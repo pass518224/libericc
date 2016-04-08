@@ -1,0 +1,11 @@
+# eclipse
+.classpath
+.project
+.settings
+
+# gradle
+.gradle
+
+# build output
+bin
+build
