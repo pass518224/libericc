@@ -17,7 +17,7 @@ public class BottomValue extends GeneralValue {
 	
 	@Override
 	public boolean equals(Object o){
-		if (o instanceof BottomValue) return true;
+		if (this == o) return true;
 		return false;
 	}
 	

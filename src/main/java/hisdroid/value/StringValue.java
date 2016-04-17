@@ -4,19 +4,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StringValueSet extends GeneralValue{
+public class StringValue extends GeneralValue{
 	Set<String> valueSet;
 	boolean bottom;
 	
-	public StringValueSet(){
+	public StringValue(){
 		bottom = true;
 	}
 		
-	public StringValueSet(String v){
+	public StringValue(String v){
 		this(Collections.singleton(v));
 	}
 	
-	public StringValueSet(Set<String> vset){
+	public StringValue(Set<String> vset){
 		valueSet = vset;
 		bottom = false;
 	}
@@ -24,11 +24,13 @@ public class StringValueSet extends GeneralValue{
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue){
 		if (otherValue instanceof TopValue) return this;
-		if (otherValue instanceof StringValueSet) {
-			StringValueSet osv = (StringValueSet) otherValue;
+		if (otherValue instanceof StringValue) {
+			StringValue osv = (StringValue) otherValue;
+			if (bottom) return this;
+			if (osv.bottom) return osv;
 			Set<String> newSet = new HashSet<String>(valueSet);
 			newSet.addAll(osv.valueSet);
-			return new StringValueSet(newSet);
+			return new StringValue(newSet);
 		}
 		return BottomValue.v();
 	}
@@ -38,8 +40,8 @@ public class StringValueSet extends GeneralValue{
 	
 	@Override
 	public boolean equals(Object o){
-		if (o instanceof StringValueSet) {
-			StringValueSet osv = (StringValueSet) o;
+		if (o instanceof StringValue) {
+			StringValue osv = (StringValue) o;
 			return bottom && osv.bottom || !bottom && !osv.bottom && valueSet.equals(osv.valueSet);
 		}
 		return false;

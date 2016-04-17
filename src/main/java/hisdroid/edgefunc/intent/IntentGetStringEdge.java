@@ -1,23 +1,24 @@
-package hisdroid.edgefunc;
+package hisdroid.edgefunc.intent;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import heros.EdgeFunction;
+import hisdroid.edgefunc.AllBottom;
+import hisdroid.edgefunc.EdgeFunctionTemplate;
 import hisdroid.value.BottomValue;
-import hisdroid.value.BundleValue;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.IntValueSet;
 import hisdroid.value.IntentValue;
-import hisdroid.value.StringValueSet;
+import hisdroid.value.StringValue;
 
 public class IntentGetStringEdge extends EdgeFunctionTemplate {
 	String name;
 	
 	public IntentGetStringEdge(){
-		this.name = "";
+		this.name = null;
 	}
 	
 	public IntentGetStringEdge(String name){
@@ -40,23 +41,24 @@ public class IntentGetStringEdge extends EdgeFunctionTemplate {
 
 	@Override
 	protected GeneralValue computeTargetImplementation(GeneralValue source) {
-		if (source instanceof IntentValue) {
+		if (source instanceof IntentValue && name != null) {
 			IntentValue intentSource = (IntentValue) source;
+			if (intentSource.bottom()) return new StringValue();
 			Set<String> stringSet = new HashSet<String>();
 			for (JSONObject i: intentSource.intents()) {
-				stringSet.add(i.getJSONObject("Extras").getString(name));
+				boolean added = false;
+				try {
+					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
+					if (v.getString("Type").equals("String")) {
+						stringSet.add(v.getString("Value"));
+						added = true;
+					}
+				} catch (JSONException e) {}
+				if (!added) return new StringValue();
 			}
-			return new StringValueSet(stringSet);
+			return new StringValue(stringSet);
 		}
-		else if (source instanceof BundleValue) {
-			BundleValue bundleSource = (BundleValue) source;
-			Set<String> stringSet = new HashSet<String>();
-			for (JSONObject i: bundleSource.bundles()) {
-				stringSet.add(i.getString(name));
-			}
-			return new StringValueSet(stringSet);
-		}
-		return new IntValueSet();
+		return new StringValue();
 	}
 
 	@Override
@@ -80,7 +82,8 @@ public class IntentGetStringEdge extends EdgeFunctionTemplate {
 
 	@Override
 	public String edgeToString() {
-		return "GetStringEdge";
+		if (name == null) return "IntentGetStringEdge()";
+		else return String.format("IntentGetStringEdge(\"%s\")", name);
 	}
 
 }

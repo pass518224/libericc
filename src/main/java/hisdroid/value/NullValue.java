@@ -1,19 +1,20 @@
 package hisdroid.value;
 
-public class TopValue extends GeneralValue{
-	private final static TopValue instance = new TopValue();
+public class NullValue extends GeneralValue {
+	private final static NullValue instance = new NullValue();
 	
-	private TopValue(){}
+	private NullValue(){}
 	
-	public static TopValue v() {
+	public static NullValue v() {
 		return instance;
 	}
 
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue){
-		return otherValue;
+		if (equals(otherValue)) return this;
+		return BottomValue.v();
 	}
-
+	
 	@Override
 	public boolean equals(Object o){
 		if (this == o) return true;
@@ -22,7 +23,6 @@ public class TopValue extends GeneralValue{
 	
 	@Override
 	public String toString(){
-		return "top";
+		return "null";
 	}
-	
 }

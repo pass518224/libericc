@@ -6,6 +6,7 @@ import java.util.Set;
 
 import hisdroid.callhandler.CallHandler.MethodSig;
 import hisdroid.callhandler.intent.*;
+import hisdroid.callhandler.bundle.*;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -17,9 +18,31 @@ public class Handlers {
 	static {
 		insertHandler(new StringInitHandler());
 		insertHandler(new GetIntentHandler());
+
+		insertHandler(new IntentGetActionHandler());
+		insertHandler(new IntentGetBooleanHandler());
+		insertHandler(new IntentGetBundleHandler());
+		insertHandler(new IntentGetByteHandler());
+		insertHandler(new IntentGetCharHandler());
+		insertHandler(new IntentGetDoubleHandler());
 		insertHandler(new IntentGetExtrasHandler());
-		insertHandler(new IntentGetStringHandler());
+		insertHandler(new IntentGetFloatHandler());
 		insertHandler(new IntentGetIntHandler());
+		insertHandler(new IntentGetLongHandler());
+		insertHandler(new IntentGetShortHandler());
+		insertHandler(new IntentGetStringHandler());
+		insertHandler(new IntentHasExtraHandler());
+		
+		insertHandler(new BundleGetBooleanHandler());
+		insertHandler(new BundleGetBundleHandler());
+		insertHandler(new BundleGetByteHandler());
+		insertHandler(new BundleGetCharHandler());
+		insertHandler(new BundleGetDoubleHandler());
+		insertHandler(new BundleGetFloatHandler());
+		insertHandler(new BundleGetIntHandler());
+		insertHandler(new BundleGetLongHandler());
+		insertHandler(new BundleGetShortHandler());
+		insertHandler(new BundleGetStringHandler());
 	}
 	
 	static public CallHandler getHandler(SootMethod method){

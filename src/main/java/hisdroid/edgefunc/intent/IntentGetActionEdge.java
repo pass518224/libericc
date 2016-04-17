@@ -1,17 +1,20 @@
-package hisdroid.edgefunc;
+package hisdroid.edgefunc.intent;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import heros.EdgeFunction;
+import hisdroid.edgefunc.AllBottom;
+import hisdroid.edgefunc.EdgeFunctionTemplate;
 import hisdroid.value.BottomValue;
-import hisdroid.value.BundleValue;
 import hisdroid.value.GeneralValue;
 import hisdroid.value.IntentValue;
+import hisdroid.value.StringValue;
 
-public class IntentGetExtraEdge extends EdgeFunctionTemplate {
+public class IntentGetActionEdge extends EdgeFunctionTemplate {
 	@Override
 	public EdgeFunctionTemplate copy() {
 		return this;
@@ -21,18 +24,24 @@ public class IntentGetExtraEdge extends EdgeFunctionTemplate {
 	protected GeneralValue computeTargetImplementation(GeneralValue source) {
 		if (source instanceof IntentValue) {
 			IntentValue intentSource = (IntentValue) source;
-			Set<JSONObject> bundleSet = new HashSet<JSONObject>();
+			if (intentSource.bottom()) return new StringValue();
+			Set<String> bundleSet = new HashSet<String>();
 			for (JSONObject i: intentSource.intents()) {
-				bundleSet.add(i.getJSONObject("Extras"));
+				try {
+					bundleSet.add(i.getString("Actions"));
+				}
+				catch (JSONException e) {
+					return new StringValue();
+				}
 			}
-			return new BundleValue(bundleSet);
+			return new StringValue(bundleSet);
 		}
-		return new BundleValue();
+		return new StringValue();
 	}
 
 	@Override
 	public EdgeFunction<GeneralValue> joinWithFirstEdge(EdgeFunction<GeneralValue> otherFunction) {
-		if (otherFunction instanceof IntentGetExtraEdge) {
+		if (otherFunction instanceof IntentGetActionEdge) {
 			return this;
 		}
 		return new AllBottom<GeneralValue>(BottomValue.v());
@@ -40,7 +49,7 @@ public class IntentGetExtraEdge extends EdgeFunctionTemplate {
 
 	@Override
 	protected boolean equalToFirstEdge(EdgeFunction<GeneralValue> other) {
-		if (other instanceof IntentGetExtraEdge) {
+		if (other instanceof IntentGetActionEdge) {
 			return true;
 		}
 		return false;
@@ -48,7 +57,7 @@ public class IntentGetExtraEdge extends EdgeFunctionTemplate {
 
 	@Override
 	public String edgeToString() {
-		return "GetExtraEdge";
+		return "IntentGetActionEdge";
 	}
 
 }

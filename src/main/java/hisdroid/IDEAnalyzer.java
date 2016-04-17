@@ -7,7 +7,7 @@ import heros.InterproceduralCFG;
 import heros.solver.IDESolver;
 import hisdroid.ide.IDEProblem;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.IntValueSet;
+import hisdroid.value.IntValue;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -69,27 +69,31 @@ public class IDEAnalyzer implements Analyzer{
 			ConditionExpr conditionExpr = (ConditionExpr) condition;
 			Value op1 = conditionExpr.getOp1();
 			Value op2 = conditionExpr.getOp2();
-			IntValueSet iv1 = null, iv2 = null;
+			IntValue iv1 = null, iv2 = null;
 			
 			if (map.containsKey(op1)) {
 				GeneralValue v1 = map.get(op1);
-				if (v1 instanceof IntValueSet) iv1 = (IntValueSet) v1;
-				else return TriLogic.Unknown;
+				if (v1 instanceof IntValue) {
+					iv1 = (IntValue) v1;
+				}
+				return TriLogic.Unknown;
 			}
 			else if (op1 instanceof IntConstant) {
 				IntConstant ic1 = (IntConstant) op1; 
-				iv1 = new IntValueSet(ic1.value);
+				iv1 = new IntValue(ic1.value);
 			}
 			else return TriLogic.Unknown;
 			
 			if (map.containsKey(op2)) {
 				GeneralValue v2 = map.get(op2);
-				if (v2 instanceof IntValueSet) iv2 = (IntValueSet) v2;
-				else return TriLogic.Unknown;
+				if (v2 instanceof IntValue) {
+					iv1 = (IntValue) v2;
+				}
+				return TriLogic.Unknown;
 			}
 			else if (op2 instanceof IntConstant) {
 				IntConstant ic2 = (IntConstant) op2; 
-				iv2 = new IntValueSet(ic2.value);
+				iv2 = new IntValue(ic2.value);
 			}
 			else return TriLogic.Unknown;
 

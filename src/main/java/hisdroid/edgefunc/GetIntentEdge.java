@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import heros.EdgeFunction;
 import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.IntValueSet;
+import hisdroid.value.IntValue;
 import hisdroid.value.IntentValue;
 
 public class GetIntentEdge extends EdgeFunctionTemplate {
@@ -30,8 +30,8 @@ public class GetIntentEdge extends EdgeFunctionTemplate {
 	
 	@Override
 	protected GeneralValue computeTargetImplementation(GeneralValue source){
-		if (source instanceof IntValueSet) {
-			IntValueSet intSetSource = (IntValueSet) source;
+		if (source instanceof IntValue) {
+			IntValue intSetSource = (IntValue) source;
 			if (!intSetSource.bottom()) {
 				Set<JSONObject> intentSet = new HashSet<JSONObject>();
 				for (Integer i: intSetSource.valueSet()) {

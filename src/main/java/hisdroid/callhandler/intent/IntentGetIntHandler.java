@@ -9,12 +9,13 @@ import heros.FlowFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import hisdroid.callhandler.CallHandler;
-import hisdroid.edgefunc.IntentGetIntEdge;
+import hisdroid.edgefunc.intent.IntentGetIntEdge;
 import hisdroid.value.GeneralValue;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.IntConstant;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 
@@ -64,12 +65,19 @@ public class IntentGetIntHandler extends CallHandler {
 			final InstanceInvokeExpr iie = (InstanceInvokeExpr) callStmt.getInvokeExpr();
 			final Value base = iie.getBase();
 			final Value arg0 = iie.getArg(0);
-			//final Value arg1 = iie.getArg(1);
+			final Value arg1 = iie.getArg(1);
 			final Value lvalue = ((DefinitionStmt)callSite).getLeftOp();
 			
 			if (arg0 instanceof StringConstant) {
-				if (callNode.equivTo(base) && returnSideNode.equivTo(lvalue)) {
-					return new IntentGetIntEdge(((StringConstant) arg0).value);
+				if (arg1 instanceof IntConstant) {
+					if (callNode.equivTo(base) && returnSideNode.equivTo(lvalue)) {
+						return new IntentGetIntEdge(((StringConstant) arg0).value, ((IntConstant) arg1).value);
+					}
+				}
+				else {
+					if (callNode.equivTo(base) && returnSideNode.equivTo(lvalue)) {
+						return new IntentGetIntEdge(((StringConstant) arg0).value);
+					}
 				}
 			}
 		}

@@ -3,7 +3,7 @@ package hisdroid;
 public enum TriLogic {
 	True, False, Unknown;
 	
-	static TriLogic toTriLogic(boolean b) {
+	static public TriLogic toTriLogic(boolean b) {
 		if (b) return True;
 		else return False;
 	}

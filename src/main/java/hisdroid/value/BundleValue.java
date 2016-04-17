@@ -25,9 +25,8 @@ public class BundleValue extends GeneralValue {
 		bottom = false;
 	}
 	
-	public Set<JSONObject> bundles(){
-		return bundles;
-	}
+	public Set<JSONObject> bundles(){ return bundles; }
+	public boolean bottom() { return bottom; }
 	
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue) {

@@ -9,7 +9,7 @@ import heros.FlowFunction;
 import heros.edgefunc.EdgeIdentity;
 import hisdroid.edgefunc.ConstantEdge;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.StringValueSet;
+import hisdroid.value.StringValue;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.InstanceInvokeExpr;
@@ -69,7 +69,7 @@ public class StringInitHandler extends CallHandler {
 			if (callNode == zeroValue && returnSideNode.equivTo(base)) {
 				String s = ((StringConstant) arg0).value;
 				logger.finest(String.format("(C2R) %s: %s -> %s [ConstantEdge(%s)]", callSite, callNode, returnSideNode, s));
-				return new ConstantEdge(new StringValueSet(s));
+				return new ConstantEdge(new StringValue(s));
 			}
 		}
 		else {

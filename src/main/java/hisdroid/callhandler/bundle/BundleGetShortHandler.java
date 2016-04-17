@@ -1,4 +1,4 @@
-package hisdroid.callhandler.intent;
+package hisdroid.callhandler.bundle;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,20 +9,22 @@ import heros.FlowFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import hisdroid.callhandler.CallHandler;
-import hisdroid.edgefunc.intent.IntentGetStringEdge;
+import hisdroid.edgefunc.intent.IntentGetShortEdge;
 import hisdroid.value.GeneralValue;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.InstanceInvokeExpr;
+import soot.jimple.IntConstant;
 import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 
-public class IntentGetStringHandler extends CallHandler {
+public class BundleGetShortHandler extends CallHandler {
 	@Override
 	public Set<MethodSig> getTargets(){
 		Set<MethodSig> targets = new HashSet<MethodSig>();
-		targets.add(new MethodSig("android.content.Intent", "java.lang.String getStringExtra(java.lang.String)"));
+		targets.add(new MethodSig("android.os.Bundle", "short getShort(java.lang.String)"));
+		targets.add(new MethodSig("android.os.Bundle", "short getShort(java.lang.String,short)"));
 		return targets;
 	}
 	
@@ -64,13 +66,17 @@ public class IntentGetStringHandler extends CallHandler {
 			final InstanceInvokeExpr iie = (InstanceInvokeExpr) callStmt.getInvokeExpr();
 			final Value base = iie.getBase();
 			final Value arg0 = iie.getArg(0);
+			int argc = iie.getArgCount();
 			final Value lvalue = ((DefinitionStmt)callSite).getLeftOp();
-			
-			
-			if (arg0 instanceof StringConstant) {
-				if (callNode.equivTo(base) && returnSideNode.equivTo(lvalue)) {
-					return new IntentGetStringEdge(((StringConstant) arg0).value);
+
+			if (callNode.equivTo(base) && returnSideNode.equivTo(lvalue) && arg0 instanceof StringConstant) {
+				if (argc == 2) {
+					final Value arg1 = iie.getArg(1);
+					if (arg1 instanceof IntConstant) {
+						return new IntentGetShortEdge(((StringConstant) arg0).value, (short)((IntConstant) arg1).value);
+					}
 				}
+				return new IntentGetShortEdge(((StringConstant) arg0).value);
 			}
 		}
 		return EdgeIdentity.v();

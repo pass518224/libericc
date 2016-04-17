@@ -89,13 +89,13 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 								final IntConstant rightOpConst = (IntConstant) rightOp;
 								int i = rightOpConst.value;
 								logger.finest(String.format("%s: %s -> %s [ConstantEdge(%s)]", curr, currNode, succNode, i));
-								return new ConstantEdge(new IntValueSet(i));
+								return new ConstantEdge(new IntValue(i));
 							}
 							if (rightOp instanceof StringConstant) {
 								final StringConstant rightOpConst = (StringConstant) rightOp;
 								String s = rightOpConst.value;
 								logger.finest(String.format("%s: %s -> %s [ConstantEdge(\"%s\")]", curr, currNode, succNode, s));
-								return new ConstantEdge(new StringValueSet(s));
+								return new ConstantEdge(new StringValue(s));
 							}
 						}
 					}
@@ -119,7 +119,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 					IntConstant c = (IntConstant) stmt.getInvokeExpr().getArgs().get(ind);
 					int i = c.value;
 					logger.finest(String.format("(Call) %s, %s: %s -> %s [ConstantEdge(%s)]", callStmt, destinationMethod, srcNode, destNode, i));
-					return new ConstantEdge(new IntValueSet(i));
+					return new ConstantEdge(new IntValue(i));
 				}
 				logger.finest(String.format("(Call) %s, %s: %s -> %s [id]", callStmt, destinationMethod, srcNode, destNode));
 				return EdgeIdentity.v();
@@ -140,7 +140,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 					IntConstant c = (IntConstant) op;
 					int i = c.value;
 					logger.finest(String.format("(Ret) %s, %s, %s: %s -> %s [ConstantEdge(%s)]", callSite, calleeMethod, exitStmt, exitNode, retNode, i));
-					return new ConstantEdge(new IntValueSet(i));
+					return new ConstantEdge(new IntValue(i));
 				}
 				logger.finest(String.format("(Ret) %s, %s, %s: %s -> %s [id]", callSite, calleeMethod, exitStmt, exitNode, retNode));
 				return EdgeIdentity.v();

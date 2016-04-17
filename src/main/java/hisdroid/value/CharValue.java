@@ -6,20 +6,19 @@ import java.util.Set;
 
 import hisdroid.TriLogic;
 
-public class IntValueSet extends GeneralValue{
-	Set<Integer> valueSet;
+public class CharValue extends GeneralValue{
+	Set<Character> valueSet;
 	boolean bottom;
 	
-	public IntValueSet(){
-		valueSet = new HashSet<Integer>();
-		bottom = true;
+	public CharValue(){
+		this(new HashSet<Character>());
 	}
 	
-	public IntValueSet(int v){
+	public CharValue(Character v){
 		this(Collections.singleton(v));
 	}
 	
-	public IntValueSet(Set<Integer> vset){
+	public CharValue(Set<Character> vset){
 		valueSet = vset;
 		bottom = vset.isEmpty();
 	}
@@ -27,11 +26,13 @@ public class IntValueSet extends GeneralValue{
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue){
 		if (otherValue instanceof TopValue) return this;
-		if (otherValue instanceof IntValueSet) {
-			IntValueSet oiv = (IntValueSet) otherValue;
-			Set<Integer> newSet = new HashSet<Integer>(valueSet);
+		if (otherValue instanceof CharValue) {
+			CharValue oiv = (CharValue) otherValue;
+			if (bottom) return this;
+			if (oiv.bottom) return oiv;
+			Set<Character> newSet = new HashSet<Character>(valueSet);
 			newSet.addAll(oiv.valueSet);
-			return new IntValueSet(newSet);
+			return new CharValue(newSet);
 		}
 		return BottomValue.v();
 	}
@@ -42,16 +43,16 @@ public class IntValueSet extends GeneralValue{
 		if (bottom) return TriLogic.Unknown;
 		else if (valueSet.size() == 1 && valueSet.contains(0)) return TriLogic.False;
 		else if (valueSet.size() >= 1 && !valueSet.contains(0)) return TriLogic.True;
-		else return TriLogic.Unknown;
+		return TriLogic.Unknown;
 	}
 	
-	public Set<Integer> valueSet() { return valueSet; }
+	public Set<Character> valueSet() { return valueSet; }
 	public boolean bottom() { return bottom; }
 	
 	@Override
 	public boolean equals(Object o){
-		if (o instanceof IntValueSet) {
-			IntValueSet oiv = (IntValueSet) o;
+		if (o instanceof CharValue) {
+			CharValue oiv = (CharValue) o;
 			return bottom && oiv.bottom || !bottom && !oiv.bottom && valueSet.equals(oiv.valueSet);
 		}
 		return false;
@@ -59,7 +60,7 @@ public class IntValueSet extends GeneralValue{
 	
 	@Override
 	public String toString(){
-		if (bottom) return "Unknown Integer";
+		if (bottom) return "Unknown Character";
 		return valueSet.toString();
 	}
 }

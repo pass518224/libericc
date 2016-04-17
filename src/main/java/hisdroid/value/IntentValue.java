@@ -25,9 +25,8 @@ public class IntentValue extends GeneralValue {
 		bottom = false;
 	}
 	
-	public Set<JSONObject> intents() {
-		return intents; 
-	}
+	public Set<JSONObject> intents() { return intents; }
+	public boolean bottom() { return bottom; }
 	
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue) {
