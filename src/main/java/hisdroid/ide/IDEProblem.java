@@ -79,84 +79,30 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			
 			@Override
 			public EdgeFunction<GeneralValue> getNormalEdgeFunction(Unit curr, Value currNode, Unit succ, Value succNode){
-				if (curr instanceof AssignStmt) {
-					final AssignStmt assign = (AssignStmt) curr;
-					final Value leftOp = assign.getLeftOp();
-					final Value rightOp = assign.getRightOp();
-					if (leftOp.equivTo(succNode)) {
-						if (currNode.equivTo(zeroValue())) {
-							if (rightOp instanceof IntConstant) {
-								final IntConstant rightOpConst = (IntConstant) rightOp;
-								int i = rightOpConst.value;
-								logger.finest(String.format("%s: %s -> %s [ConstantEdge(%s)]", curr, currNode, succNode, i));
-								return new ConstantEdge(new IntValue(i));
-							}
-							if (rightOp instanceof StringConstant) {
-								final StringConstant rightOpConst = (StringConstant) rightOp;
-								String s = rightOpConst.value;
-								logger.finest(String.format("%s: %s -> %s [ConstantEdge(\"%s\")]", curr, currNode, succNode, s));
-								return new ConstantEdge(new StringValue(s));
-							}
-						}
-					}
-				}
-				logger.finest(String.format("%s: %s -> %s [id]", curr, currNode, succNode));
-				return EdgeIdentity.v();
+				EdgeFunction<GeneralValue> ret = getNormalEdge(curr, currNode, succ, succNode);
+				logger.finest(String.format("%s: %s -> %s [%s]", curr, currNode, succNode, ret));
+				return ret;
 			}
 
 			@Override
 			public EdgeFunction<GeneralValue> getCallEdgeFunction(Unit callStmt, Value srcNode, SootMethod destinationMethod, Value destNode) {
-				Stmt stmt = (Stmt) callStmt;
-				InvokeExpr ie = stmt.getInvokeExpr();
-				
-				CallHandler ch = Handlers.getHandler(ie.getMethod());
-				if (ch != null) {
-					return ch.getCallEdgeFunction(callStmt, srcNode, destinationMethod, destNode, zeroValue());
-				}
-				
-				if (srcNode.equivTo(zeroValue()) && !destNode.equivTo(zeroValue())) {
-					int ind = destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode);
-					IntConstant c = (IntConstant) stmt.getInvokeExpr().getArgs().get(ind);
-					int i = c.value;
-					logger.finest(String.format("(Call) %s, %s: %s -> %s [ConstantEdge(%s)]", callStmt, destinationMethod, srcNode, destNode, i));
-					return new ConstantEdge(new IntValue(i));
-				}
-				logger.finest(String.format("(Call) %s, %s: %s -> %s [id]", callStmt, destinationMethod, srcNode, destNode));
-				return EdgeIdentity.v();
+				EdgeFunction<GeneralValue> ret = getCallEdge(callStmt, srcNode, destinationMethod, destNode);
+				logger.finest(String.format("(Call) %s, %s: %s -> %s [%s]", callStmt, destinationMethod, srcNode, destNode, ret));
+				return ret;
 			}
 
 			@Override
 			public EdgeFunction<GeneralValue> getReturnEdgeFunction(Unit callSite, SootMethod calleeMethod, Unit exitStmt, Value exitNode, Unit returnSite, Value retNode){
-				Stmt stmt = (Stmt) callSite;
-				InvokeExpr ie = stmt.getInvokeExpr();
-				
-				CallHandler ch = Handlers.getHandler(ie.getMethod());
-				if (ch != null) {
-					return ch.getReturnEdgeFunction(callSite, calleeMethod, exitStmt, exitNode, returnSite, retNode, zeroValue());
-				}
-				if (exitNode.equivTo(zeroValue()) && !retNode.equivTo(zeroValue())) {
-					ReturnStmt returnStmt = (ReturnStmt) exitStmt;
-					Value op = returnStmt.getOp();
-					IntConstant c = (IntConstant) op;
-					int i = c.value;
-					logger.finest(String.format("(Ret) %s, %s, %s: %s -> %s [ConstantEdge(%s)]", callSite, calleeMethod, exitStmt, exitNode, retNode, i));
-					return new ConstantEdge(new IntValue(i));
-				}
-				logger.finest(String.format("(Ret) %s, %s, %s: %s -> %s [id]", callSite, calleeMethod, exitStmt, exitNode, retNode));
-				return EdgeIdentity.v();
+				EdgeFunction<GeneralValue> ret = getReturnEdge(callSite, calleeMethod, exitStmt, exitNode, returnSite, retNode);
+				logger.finest(String.format("(Ret) %s, %s, %s: %s -> %s [%s]", callSite, calleeMethod, exitStmt, exitNode, retNode, ret));
+				return ret;
 			}
 
 			@Override
 			public EdgeFunction<GeneralValue> getCallToReturnEdgeFunction(Unit callSite, Value callNode, Unit returnSite, Value returnSideNode){
-				Stmt stmt = (Stmt) callSite;
-				InvokeExpr ie = stmt.getInvokeExpr();
-				
-				
-				CallHandler ch = Handlers.getHandler(ie.getMethod());
-				if (ch != null) {
-					return ch.getCallToReturnEdgeFunction(callSite, callNode, returnSite, returnSideNode, zeroValue());
-				}
-				return EdgeIdentity.v();
+				EdgeFunction<GeneralValue> ret = getCallToReturnEdge(callSite, callNode, returnSite, returnSideNode);
+				logger.finest(String.format("(C2R) %s: %s -> %s [%s]", callSite, callNode, returnSideNode, ret));
+				return ret;
 			}
 		};
 	}
@@ -168,203 +114,22 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 
 			@Override
 			public FlowFunction<Value> getNormalFlowFunction(Unit curr, Unit succ){
-				if (curr instanceof AssignStmt) {
-					final AssignStmt assign = (AssignStmt) curr;
-					final Value leftOp = assign.getLeftOp();
-					final Value rightOp = assign.getRightOp();
-					if (rightOp instanceof IntConstant) {
-						return new Transfer<Value>(leftOp, zeroValue());
-					}
-					if (rightOp instanceof StringConstant) {
-						return new Transfer<Value>(leftOp, zeroValue());
-					}
-					return new FlowFunction<Value>(){
-						@Override
-						public Set<Value> computeTargets(Value source){
-							Set<Value> res = new HashSet<Value>();
-							if (source.equivTo(rightOp)) {
-								res.add(leftOp);
-							}
-							else {
-								PointsToSet rightPointsToSet = null, sourcePointsToSet = null;
-								if (rightOp instanceof Local) {
-									Local rightLocal = (Local) rightOp;
-									rightPointsToSet = pointsToAnalysis.reachingObjects(rightLocal);
-								}
-								else if (rightOp instanceof StaticFieldRef){
-									StaticFieldRef rightStaticFieldRef = (StaticFieldRef) rightOp;
-									rightPointsToSet = pointsToAnalysis.reachingObjects(rightStaticFieldRef.getField());
-								}
-								else if (rightOp instanceof InstanceFieldRef){
-									InstanceFieldRef rightInstanceFieldRef = (InstanceFieldRef) rightOp;
-									PointsToSet set = pointsToAnalysis.reachingObjects((Local) rightInstanceFieldRef.getBase());
-									rightPointsToSet = pointsToAnalysis.reachingObjects(set, rightInstanceFieldRef.getField());
-								}
-								if (source instanceof Local) {
-									Local sourceLocal = (Local) source;
-									sourcePointsToSet = pointsToAnalysis.reachingObjects(sourceLocal);
-								}
-								else if (source instanceof StaticFieldRef){
-									StaticFieldRef sourceStaticFieldRef = (StaticFieldRef) source;
-									rightPointsToSet = pointsToAnalysis.reachingObjects(sourceStaticFieldRef.getField());
-								}
-								else if (source instanceof InstanceFieldRef){
-									InstanceFieldRef sourceInstanceFieldRef = (InstanceFieldRef) source;
-									PointsToSet set = pointsToAnalysis.reachingObjects((Local) sourceInstanceFieldRef.getBase());
-									sourcePointsToSet = pointsToAnalysis.reachingObjects(set, sourceInstanceFieldRef.getField());
-								}
-								if (rightPointsToSet != null && sourcePointsToSet != null && rightPointsToSet.hasNonEmptyIntersection(sourcePointsToSet)) {
-									res.add(leftOp);
-								}
-							}
-							
-							if (!source.equivTo(leftOp)) {
-								res.add(source);
-							}
-							return res;
-						}
-					};
-					
-				}
-				return Identity.v();
+				return getNormalFlow(curr, succ);
 			}
 
 			@Override
 			public FlowFunction<Value> getCallFlowFunction(Unit callStmt, SootMethod destinationMethod) {
-				if ("<clinit>".equals(destinationMethod.getName())) {
-					return KillAll.v();
-				}
-				
-				Stmt stmt = (Stmt) callStmt;
-				InvokeExpr ie = stmt.getInvokeExpr();
-				
-				CallHandler ch = Handlers.getHandler(ie.getMethod());
-				if (ch != null) {
-					return ch.getCallFlowFunction(callStmt, destinationMethod, zeroValue());
-				}
-				
-				final List<Value> callArgs = ie.getArgs();
-				final List<Value> paramLocals = new ArrayList<Value>();
-				for(int i=0;i<destinationMethod.getParameterCount();i++) {
-					paramLocals.add(destinationMethod.getActiveBody().getParameterLocal(i));
-				}
-				
-				return new FlowFunction<Value>() {
-					@Override
-					public Set<Value> computeTargets(Value source) {
-						Set<Value> ret = new HashSet<Value>();
-						if (source.equivTo(zeroValue())) {
-							for (int i=0; i<callArgs.size(); i++) {
-								if (callArgs.get(i) instanceof IntConstant) {
-									ret.add(paramLocals.get(i));
-								}
-							}
-						}
-						else {
-							if (source instanceof StaticFieldRef) {
-								ret.add(source);
-							}
-							for (int i=0; i<callArgs.size(); i++) {
-								if (callArgs.get(i).equivTo(source)) {
-									ret.add(paramLocals.get(i));
-								}
-							}
-						}
-						return ret;
-					}
-				};
+				return getCallFlow(callStmt, destinationMethod);
 			}
 
 			@Override
-			public FlowFunction<Value> getReturnFlowFunction(final Unit callSite, final SootMethod calleeMethod, Unit exitStmt, Unit returnSite){
-				Stmt stmt = (Stmt) callSite;
-				InvokeExpr ie = stmt.getInvokeExpr();
-				
-				CallHandler ch = Handlers.getHandler(ie.getMethod());
-				if (ch != null) {
-					return ch.getReturnFlowFunction(callSite, calleeMethod, exitStmt, returnSite, zeroValue());
-				}
-				
-				if (exitStmt instanceof ReturnStmt) {								
-					ReturnStmt returnStmt = (ReturnStmt) exitStmt;
-					final Value retOp = returnStmt.getOp();
-					return new FlowFunction<Value>() {
-						@Override
-						public Set<Value> computeTargets(Value source) {
-							Set<Value> ret = new HashSet<Value>();
-							if (source instanceof StaticFieldRef) {
-								ret.add(source);
-							}
-							if (callSite instanceof DefinitionStmt) {
-								DefinitionStmt defnStmt = (DefinitionStmt) callSite;
-								final Value leftOp = defnStmt.getLeftOp();
-								if (retOp instanceof IntConstant) {
-									if (source.equivTo(zeroValue())) {
-										ret.add(leftOp);
-									}
-								}
-								else if (source.equivTo(retOp)) {
-									ret.add(leftOp);
-								}
-								
-							}
-							return ret;
-						}
-					};
-				}
-				if (exitStmt instanceof ReturnVoidStmt) {
-					return new FlowFunction<Value>() {
-						@Override
-						public Set<Value> computeTargets(Value source) {
-							if (source instanceof StaticFieldRef) {
-								return Collections.singleton(source);
-							}
-							return Collections.emptySet();
-						}
-					};
-				} 
-				return KillAll.v();
+			public FlowFunction<Value> getReturnFlowFunction(Unit callSite, SootMethod calleeMethod, Unit exitStmt, Unit returnSite){
+				return getReturnFlow(callSite, calleeMethod, exitStmt, returnSite);
 			}
 
 			@Override
-			public FlowFunction<Value> getCallToReturnFlowFunction(final Unit callSite, Unit returnSite){
-				Stmt stmt = (Stmt) callSite;
-				InvokeExpr ie = stmt.getInvokeExpr();
-				
-				CallHandler ch = Handlers.getHandler(ie.getMethod());
-				if (ch != null) {
-					return ch.getCallToReturnFlowFunction(callSite, returnSite, zeroValue());
-				}
-				
-				if (icfg.getCalleesOfCallAt(callSite).isEmpty()) {
-					return new FlowFunction<Value>() {
-						@Override
-						public Set<Value> computeTargets(Value source) {
-							if (callSite instanceof DefinitionStmt) {
-								DefinitionStmt definition = (DefinitionStmt) callSite;
-								if (source.equivTo(definition.getLeftOp())) {
-									return Collections.emptySet();
-								}
-							}
-							return Collections.singleton(source);
-						}
-					};
-				}
-				return new FlowFunction<Value>() {
-					@Override
-					public Set<Value> computeTargets(Value source) {
-						if (source instanceof StaticFieldRef){
-							return Collections.emptySet();
-						}
-						if (callSite instanceof DefinitionStmt) {
-							DefinitionStmt definition = (DefinitionStmt) callSite;
-							if (source.equivTo(definition.getLeftOp())) {
-								return Collections.emptySet();
-							}
-						}
-						return Collections.singleton(source);
-					}
-				};
+			public FlowFunction<Value> getCallToReturnFlowFunction(Unit callSite, Unit returnSite){
+				return getCallToReturnFlow(callSite, returnSite);
 			}
 		};
 	}
@@ -378,4 +143,267 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 	protected Value createZeroValue(){
 		return new JimpleLocal("<<zero>>", NullType.v());
 	}
+	
+	EdgeFunction<GeneralValue> getNormalEdge(Unit curr, Value currNode, Unit succ, Value succNode){
+		if (curr instanceof AssignStmt) {
+			final AssignStmt assign = (AssignStmt) curr;
+			final Value leftOp = assign.getLeftOp();
+			final Value rightOp = assign.getRightOp();
+			if (leftOp.equivTo(succNode)) {
+				if (currNode.equivTo(zeroValue())) {
+					if (rightOp instanceof IntConstant) {
+						final IntConstant rightOpConst = (IntConstant) rightOp;
+						return new ConstantEdge(new IntValue(rightOpConst.value));
+					}
+					if (rightOp instanceof StringConstant) {
+						final StringConstant rightOpConst = (StringConstant) rightOp;
+						return new ConstantEdge(new StringValue(rightOpConst.value));
+					}
+				}
+			}
+		}
+		return EdgeIdentity.v();
+	}
+	
+	EdgeFunction<GeneralValue> getCallEdge(Unit callStmt, Value srcNode, SootMethod destinationMethod, Value destNode){
+		Stmt stmt = (Stmt) callStmt;
+		InvokeExpr ie = stmt.getInvokeExpr();
+		
+		CallHandler ch = Handlers.getHandler(ie.getMethod());
+		if (ch != null) {
+			return ch.getCallEdgeFunction(callStmt, srcNode, destinationMethod, destNode, zeroValue());
+		}
+		
+		if (srcNode.equivTo(zeroValue()) && !destNode.equivTo(zeroValue())) {
+			int ind = destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode);
+			IntConstant c = (IntConstant) stmt.getInvokeExpr().getArgs().get(ind);
+			return new ConstantEdge(new IntValue(c.value));
+		}
+		return EdgeIdentity.v();
+	}
+	
+	EdgeFunction<GeneralValue> getReturnEdge(Unit callSite, SootMethod calleeMethod, Unit exitStmt, Value exitNode, Unit returnSite, Value retNode){
+		Stmt stmt = (Stmt) callSite;
+		InvokeExpr ie = stmt.getInvokeExpr();
+		
+		CallHandler ch = Handlers.getHandler(ie.getMethod());
+		if (ch != null) {
+			return ch.getReturnEdgeFunction(callSite, calleeMethod, exitStmt, exitNode, returnSite, retNode, zeroValue());
+		}
+		if (exitNode.equivTo(zeroValue()) && !retNode.equivTo(zeroValue())) {
+			ReturnStmt returnStmt = (ReturnStmt) exitStmt;
+			IntConstant c = (IntConstant) returnStmt.getOp();
+			return new ConstantEdge(new IntValue(c.value));
+		}
+		return EdgeIdentity.v();
+	}
+	
+	EdgeFunction<GeneralValue> getCallToReturnEdge(Unit callSite, Value callNode, Unit returnSite, Value returnSideNode){
+		Stmt stmt = (Stmt) callSite;
+		InvokeExpr ie = stmt.getInvokeExpr();
+
+		CallHandler ch = Handlers.getHandler(ie.getMethod());
+		if (ch != null) {
+			return ch.getCallToReturnEdgeFunction(callSite, callNode, returnSite, returnSideNode, zeroValue());
+		}
+		return EdgeIdentity.v();
+	}
+	
+	FlowFunction<Value> getNormalFlow(Unit curr, Unit succ){
+		if (curr instanceof AssignStmt) {
+			final AssignStmt assign = (AssignStmt) curr;
+			final Value leftOp = assign.getLeftOp();
+			final Value rightOp = assign.getRightOp();
+			if (rightOp instanceof IntConstant) {
+				return new Transfer<Value>(leftOp, zeroValue());
+			}
+			if (rightOp instanceof StringConstant) {
+				return new Transfer<Value>(leftOp, zeroValue());
+			}
+			return new FlowFunction<Value>(){
+				@Override
+				public Set<Value> computeTargets(Value source){
+					Set<Value> res = new HashSet<Value>();
+					if (source.equivTo(rightOp)) {
+						res.add(leftOp);
+					}
+					else {
+						PointsToSet rightPointsToSet = null, sourcePointsToSet = null;
+						if (rightOp instanceof Local) {
+							Local rightLocal = (Local) rightOp;
+							rightPointsToSet = pointsToAnalysis.reachingObjects(rightLocal);
+						}
+						else if (rightOp instanceof StaticFieldRef){
+							StaticFieldRef rightStaticFieldRef = (StaticFieldRef) rightOp;
+							rightPointsToSet = pointsToAnalysis.reachingObjects(rightStaticFieldRef.getField());
+						}
+						else if (rightOp instanceof InstanceFieldRef){
+							InstanceFieldRef rightInstanceFieldRef = (InstanceFieldRef) rightOp;
+							PointsToSet set = pointsToAnalysis.reachingObjects((Local) rightInstanceFieldRef.getBase());
+							rightPointsToSet = pointsToAnalysis.reachingObjects(set, rightInstanceFieldRef.getField());
+						}
+						if (source instanceof Local) {
+							Local sourceLocal = (Local) source;
+							sourcePointsToSet = pointsToAnalysis.reachingObjects(sourceLocal);
+						}
+						else if (source instanceof StaticFieldRef){
+							StaticFieldRef sourceStaticFieldRef = (StaticFieldRef) source;
+							rightPointsToSet = pointsToAnalysis.reachingObjects(sourceStaticFieldRef.getField());
+						}
+						else if (source instanceof InstanceFieldRef){
+							InstanceFieldRef sourceInstanceFieldRef = (InstanceFieldRef) source;
+							PointsToSet set = pointsToAnalysis.reachingObjects((Local) sourceInstanceFieldRef.getBase());
+							sourcePointsToSet = pointsToAnalysis.reachingObjects(set, sourceInstanceFieldRef.getField());
+						}
+						if (rightPointsToSet != null && sourcePointsToSet != null && rightPointsToSet.hasNonEmptyIntersection(sourcePointsToSet)) {
+							res.add(leftOp);
+						}
+					}
+					
+					if (!source.equivTo(leftOp)) {
+						res.add(source);
+					}
+					return res;
+				}
+			};
+			
+		}
+		return Identity.v();
+	}
+
+	FlowFunction<Value> getCallFlow(Unit callStmt, SootMethod destinationMethod) {
+		if ("<clinit>".equals(destinationMethod.getName())) {
+			return KillAll.v();
+		}
+		
+		Stmt stmt = (Stmt) callStmt;
+		InvokeExpr ie = stmt.getInvokeExpr();
+		
+		CallHandler ch = Handlers.getHandler(ie.getMethod());
+		if (ch != null) {
+			return ch.getCallFlowFunction(callStmt, destinationMethod, zeroValue());
+		}
+		
+		final List<Value> callArgs = ie.getArgs();
+		final List<Value> paramLocals = new ArrayList<Value>();
+		for(int i=0;i<destinationMethod.getParameterCount();i++) {
+			paramLocals.add(destinationMethod.getActiveBody().getParameterLocal(i));
+		}
+		
+		return new FlowFunction<Value>() {
+			@Override
+			public Set<Value> computeTargets(Value source) {
+				Set<Value> ret = new HashSet<Value>();
+				if (source.equivTo(zeroValue())) {
+					for (int i=0; i<callArgs.size(); i++) {
+						if (callArgs.get(i) instanceof IntConstant) {
+							ret.add(paramLocals.get(i));
+						}
+					}
+				}
+				else {
+					if (source instanceof StaticFieldRef) {
+						ret.add(source);
+					}
+					for (int i=0; i<callArgs.size(); i++) {
+						if (callArgs.get(i).equivTo(source)) {
+							ret.add(paramLocals.get(i));
+						}
+					}
+				}
+				return ret;
+			}
+		};
+	}
+
+	FlowFunction<Value> getReturnFlow(final Unit callSite, final SootMethod calleeMethod, Unit exitStmt, Unit returnSite){
+		Stmt stmt = (Stmt) callSite;
+		InvokeExpr ie = stmt.getInvokeExpr();
+		
+		CallHandler ch = Handlers.getHandler(ie.getMethod());
+		if (ch != null) {
+			return ch.getReturnFlowFunction(callSite, calleeMethod, exitStmt, returnSite, zeroValue());
+		}
+		
+		if (exitStmt instanceof ReturnStmt) {								
+			ReturnStmt returnStmt = (ReturnStmt) exitStmt;
+			final Value retOp = returnStmt.getOp();
+			return new FlowFunction<Value>() {
+				@Override
+				public Set<Value> computeTargets(Value source) {
+					Set<Value> ret = new HashSet<Value>();
+					if (source instanceof StaticFieldRef) {
+						ret.add(source);
+					}
+					if (callSite instanceof DefinitionStmt) {
+						DefinitionStmt defnStmt = (DefinitionStmt) callSite;
+						final Value leftOp = defnStmt.getLeftOp();
+						if (retOp instanceof IntConstant) {
+							if (source.equivTo(zeroValue())) {
+								ret.add(leftOp);
+							}
+						}
+						else if (source.equivTo(retOp)) {
+							ret.add(leftOp);
+						}
+						
+					}
+					return ret;
+				}
+			};
+		}
+		if (exitStmt instanceof ReturnVoidStmt) {
+			return new FlowFunction<Value>() {
+				@Override
+				public Set<Value> computeTargets(Value source) {
+					if (source instanceof StaticFieldRef) {
+						return Collections.singleton(source);
+					}
+					return Collections.emptySet();
+				}
+			};
+		} 
+		return KillAll.v();
+	}
+
+	FlowFunction<Value> getCallToReturnFlow(final Unit callSite, Unit returnSite){
+		Stmt stmt = (Stmt) callSite;
+		InvokeExpr ie = stmt.getInvokeExpr();
+		
+		CallHandler ch = Handlers.getHandler(ie.getMethod());
+		if (ch != null) {
+			return ch.getCallToReturnFlowFunction(callSite, returnSite, zeroValue());
+		}
+		
+		if (icfg.getCalleesOfCallAt(callSite).isEmpty()) {
+			return new FlowFunction<Value>() {
+				@Override
+				public Set<Value> computeTargets(Value source) {
+					if (callSite instanceof DefinitionStmt) {
+						DefinitionStmt definition = (DefinitionStmt) callSite;
+						if (source.equivTo(definition.getLeftOp())) {
+							return Collections.emptySet();
+						}
+					}
+					return Collections.singleton(source);
+				}
+			};
+		}
+		return new FlowFunction<Value>() {
+			@Override
+			public Set<Value> computeTargets(Value source) {
+				if (source instanceof StaticFieldRef){
+					return Collections.emptySet();
+				}
+				if (callSite instanceof DefinitionStmt) {
+					DefinitionStmt definition = (DefinitionStmt) callSite;
+					if (source.equivTo(definition.getLeftOp())) {
+						return Collections.emptySet();
+					}
+				}
+				return Collections.singleton(source);
+			}
+		};
+	}
+
 }
