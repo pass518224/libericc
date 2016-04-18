@@ -57,7 +57,7 @@ public class IntValue extends GeneralValue{
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString(){
 		if (bottom) return "Unknown Integer";

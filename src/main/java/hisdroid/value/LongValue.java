@@ -57,7 +57,7 @@ public class LongValue extends GeneralValue{
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString(){
 		if (bottom) return "Unknown Long";

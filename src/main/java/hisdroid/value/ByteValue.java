@@ -22,7 +22,7 @@ public class ByteValue extends GeneralValue{
 		valueSet = vset;
 		bottom = vset.isEmpty();
 	}
-	
+
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue){
 		if (otherValue instanceof TopValue) return this;

@@ -3,8 +3,6 @@ package hisdroid.value;
 public class NullValue extends GeneralValue {
 	private final static NullValue instance = new NullValue();
 	
-	private NullValue(){}
-	
 	public static NullValue v() {
 		return instance;
 	}

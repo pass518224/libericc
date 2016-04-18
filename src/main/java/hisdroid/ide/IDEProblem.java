@@ -20,6 +20,7 @@ import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import heros.flowfunc.KillAll;
 import heros.flowfunc.Transfer;
+import hisdroid.ValueType;
 import hisdroid.callhandler.CallHandler;
 import hisdroid.callhandler.Handlers;
 import hisdroid.edgefunc.*;
@@ -29,19 +30,24 @@ import soot.PointsToAnalysis;
 import soot.PointsToSet;
 import soot.Scene;
 import soot.SootMethod;
+import soot.Type;
 import soot.Unit;
 import soot.Value;
+import soot.DoubleType;
+import soot.FloatType;
+import soot.IntType;
 import soot.Local;
+import soot.LongType;
 import soot.jimple.AssignStmt;
+import soot.jimple.CastExpr;
+import soot.jimple.Constant;
 import soot.jimple.DefinitionStmt;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeExpr;
-import soot.jimple.IntConstant;
 import soot.jimple.ReturnStmt;
 import soot.jimple.ReturnVoidStmt;
 import soot.jimple.StaticFieldRef;
 import soot.jimple.Stmt;
-import soot.jimple.StringConstant;
 import soot.jimple.internal.JimpleLocal;
 import soot.jimple.toolkits.ide.DefaultJimpleIDETabulationProblem;
 
@@ -51,6 +57,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 	
 	SootMethod mainMethod = null;
 	final InterproceduralCFG<Unit,SootMethod> icfg;
+	IDEUtility utility = new IDEUtility(this);
 	
 	public IDEProblem(InterproceduralCFG<Unit,SootMethod> icfg) {
 		this(icfg, Scene.v().getMainMethod());
@@ -149,17 +156,30 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			final AssignStmt assign = (AssignStmt) curr;
 			final Value leftOp = assign.getLeftOp();
 			final Value rightOp = assign.getRightOp();
-			if (leftOp.equivTo(succNode)) {
-				if (currNode.equivTo(zeroValue())) {
-					if (rightOp instanceof IntConstant) {
-						final IntConstant rightOpConst = (IntConstant) rightOp;
-						return new ConstantEdge(new IntValue(rightOpConst.value));
+			
+			if (rightOp instanceof Constant) {
+				if (currNode.equivTo(zeroValue()) && succNode.equivTo(leftOp)) {
+					return utility.getEdgeFromConstant((Constant)rightOp);
+				}
+			}
+			if (rightOp instanceof CastExpr) {
+				Value r = ((CastExpr)rightOp).getOp();
+				if (currNode.equivTo(r) && succNode.equivTo(leftOp)) {
+					Type t = ((CastExpr)rightOp).getCastType();
+					if (t instanceof IntType) {
+						return new CastEdge(ValueType.Int);
 					}
-					if (rightOp instanceof StringConstant) {
-						final StringConstant rightOpConst = (StringConstant) rightOp;
-						return new ConstantEdge(new StringValue(rightOpConst.value));
+					if (t instanceof LongType) {
+						return new CastEdge(ValueType.Long);
+					}
+					if (t instanceof FloatType) {
+						return new CastEdge(ValueType.Float);
+					}
+					if (t instanceof DoubleType) {
+						return new CastEdge(ValueType.Double);
 					}
 				}
+				return allTopFunction();
 			}
 		}
 		return EdgeIdentity.v();
@@ -176,8 +196,10 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 		
 		if (srcNode.equivTo(zeroValue()) && !destNode.equivTo(zeroValue())) {
 			int ind = destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode);
-			IntConstant c = (IntConstant) stmt.getInvokeExpr().getArgs().get(ind);
-			return new ConstantEdge(new IntValue(c.value));
+			Value arg = stmt.getInvokeExpr().getArgs().get(ind);
+			if (arg instanceof Constant) {
+				return utility.getEdgeFromConstant((Constant)arg);
+			}
 		}
 		return EdgeIdentity.v();
 	}
@@ -192,8 +214,10 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 		}
 		if (exitNode.equivTo(zeroValue()) && !retNode.equivTo(zeroValue())) {
 			ReturnStmt returnStmt = (ReturnStmt) exitStmt;
-			IntConstant c = (IntConstant) returnStmt.getOp();
-			return new ConstantEdge(new IntValue(c.value));
+			Value v = returnStmt.getOp();
+			if (v instanceof Constant) {
+				return utility.getEdgeFromConstant((Constant)v);
+			}
 		}
 		return EdgeIdentity.v();
 	}
@@ -209,16 +233,19 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 		return EdgeIdentity.v();
 	}
 	
+	
+	
 	FlowFunction<Value> getNormalFlow(Unit curr, Unit succ){
 		if (curr instanceof AssignStmt) {
 			final AssignStmt assign = (AssignStmt) curr;
 			final Value leftOp = assign.getLeftOp();
 			final Value rightOp = assign.getRightOp();
-			if (rightOp instanceof IntConstant) {
+			if (rightOp instanceof Constant) {
 				return new Transfer<Value>(leftOp, zeroValue());
 			}
-			if (rightOp instanceof StringConstant) {
-				return new Transfer<Value>(leftOp, zeroValue());
+			if (rightOp instanceof CastExpr) {
+				Value r = ((CastExpr)rightOp).getOp();
+				return new Transfer<Value>(leftOp, r);
 			}
 			return new FlowFunction<Value>(){
 				@Override
@@ -296,7 +323,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 				Set<Value> ret = new HashSet<Value>();
 				if (source.equivTo(zeroValue())) {
 					for (int i=0; i<callArgs.size(); i++) {
-						if (callArgs.get(i) instanceof IntConstant) {
+						if (callArgs.get(i) instanceof Constant) {
 							ret.add(paramLocals.get(i));
 						}
 					}
@@ -338,7 +365,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 					if (callSite instanceof DefinitionStmt) {
 						DefinitionStmt defnStmt = (DefinitionStmt) callSite;
 						final Value leftOp = defnStmt.getLeftOp();
-						if (retOp instanceof IntConstant) {
+						if (retOp instanceof Constant) {
 							if (source.equivTo(zeroValue())) {
 								ret.add(leftOp);
 							}

@@ -46,7 +46,7 @@ public class DoubleValue extends GeneralValue{
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString(){
 		if (bottom) return "Unknown Double";
