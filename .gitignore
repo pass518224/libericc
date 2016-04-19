@@ -9,3 +9,7 @@
 # build output
 bin
 build
+
+# output
+sootOutput
+*.log
