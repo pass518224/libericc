@@ -2,6 +2,7 @@ package hisdroid;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.logging.LogManager;
 
 import soot.PackManager;
 import soot.SceneTransformer;
@@ -12,9 +13,10 @@ import soot.options.Options;
 
 public class Main {	
 	public static void main(String[] args) {
+		readLogProperties();
 		setOptions();
 		
-		Config.loadIccLogs("/home/chchao/test1.json");
+		Config.loadIccLogs("/home/chchao/git/test/test1.json");
 		final SootMethod dummyMain = new DummyMainCreator().createDummyMain();
 		
 		PackManager.v().getPack("wjtp").add(new Transform("wjtp.IDEAnalysis", new SceneTransformer() {
@@ -40,9 +42,20 @@ public class Main {
 		//Options.v().set_output_format(Options.output_format_jimple); // -f J
 		//  -android-jars /home/chchao/test/android-platforms-master -process-path /home/chchao/AndroidStudioProjects/Asdf/app/app-release.apk
 		Options.v().set_android_jars("/home/chchao/test/android-platforms-master");
-		Options.v().set_process_dir(Collections.singletonList("/home/chchao/AndroidStudioProjects/Asdf/app/app-release.apk"));
+		//Options.v().set_process_dir(Collections.singletonList("/home/chchao/AndroidStudioProjects/Asdf/app/app-release.apk"));
+		Options.v().set_process_dir(Collections.singletonList("/home/chchao/git/test/test1.apk"));
 		
 		Options.v().setPhaseOption("cg.spark", "enabled:true");
 		Options.v().setPhaseOption("cg.spark", "string-constants:true");
+	}
+	
+	static void readLogProperties(){
+		try {
+			LogManager.getLogManager().readConfiguration(Object.class.getResourceAsStream("/javalog.properties"));
+		}
+		catch (Exception e) {
+			System.err.println("Cannot Find Log Properties");
+			System.exit(1);
+		}
 	}
 }
