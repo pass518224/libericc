@@ -76,7 +76,7 @@ public class IDEAnalyzer implements Analyzer{
 				if (v1 instanceof IntValue) {
 					iv1 = (IntValue) v1;
 				}
-				return TriLogic.Unknown;
+				else return TriLogic.Unknown;
 			}
 			else if (op1 instanceof IntConstant) {
 				IntConstant ic1 = (IntConstant) op1; 
@@ -89,7 +89,7 @@ public class IDEAnalyzer implements Analyzer{
 				if (v2 instanceof IntValue) {
 					iv1 = (IntValue) v2;
 				}
-				return TriLogic.Unknown;
+				else return TriLogic.Unknown;
 			}
 			else if (op2 instanceof IntConstant) {
 				IntConstant ic2 = (IntConstant) op2; 
