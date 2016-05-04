@@ -49,9 +49,9 @@ public class IntentGetBundleEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("Bundle")) {
-						bundleSet.add(v.getJSONObject("Value"));
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("3")) {
+						bundleSet.add(v.getJSONObject("_"));
 						added = true;
 					}
 				} catch (JSONException e) {}

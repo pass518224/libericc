@@ -46,7 +46,7 @@ public class IntentHasExtraEdge extends EdgeFunctionTemplate {
 			boolean t = false, f = false;  
 			for (JSONObject i: intentSource.intents()) {
 				try {
-					if (i.getJSONObject("Extras").has(name)) t = true;
+					if (i.getJSONObject("mExtras").has(name)) t = true;
 					else f = true;
 				} catch (JSONException e) {
 					return new BooleanValue();

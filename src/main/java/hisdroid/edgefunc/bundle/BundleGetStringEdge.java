@@ -60,8 +60,8 @@ public class BundleGetStringEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("String")) {
-						stringSet.add(v.getString("Value"));
+					if (v.getString("type").equals("0")) {
+						stringSet.add(v.getString("_"));
 						added = true;
 					}
 				} catch (JSONException e) {}

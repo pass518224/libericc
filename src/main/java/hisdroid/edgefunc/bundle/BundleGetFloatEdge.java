@@ -60,8 +60,8 @@ public class BundleGetFloatEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("Float")) {
-						floatSet.add(Float.valueOf(v.getString("Value")));
+					if (v.getString("type").equals("7")) {
+						floatSet.add(Float.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

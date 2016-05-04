@@ -59,9 +59,9 @@ public class IntentGetFloatEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("Float")) {
-						floatSet.add(Float.valueOf(v.getString("Value")));
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("7")) {
+						floatSet.add(Float.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

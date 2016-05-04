@@ -57,9 +57,9 @@ public class IntentGetBooleanEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("Boolean")) {
-						if (Boolean.valueOf(v.getString("Value"))) t =  true;
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("9")) {
+						if (Boolean.valueOf(v.getString("_"))) t =  true;
 						else f = true;
 						added = true;
 					}

@@ -6,6 +6,7 @@ import java.util.Set;
 import org.json.JSONObject;
 
 import heros.EdgeFunction;
+import hisdroid.Utility;
 import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;
 import hisdroid.value.IntValue;
@@ -18,14 +19,14 @@ public class GetIntentEdge extends EdgeFunctionTemplate {
 		this.iccLogs = iccLogs;
 	}
 	
-	public GetIntentEdge(JSONObject iccLogs, EdgeFunction<GeneralValue> next) {
-		this.iccLogs = iccLogs;
+	public GetIntentEdge(GetIntentEdge old, EdgeFunction<GeneralValue> next) {
+		this.iccLogs = old.iccLogs;
 		this.next = next; 
 	}
 	
 	@Override
 	public EdgeFunctionTemplate copy(){
-		return new GetIntentEdge(iccLogs, next);
+		return new GetIntentEdge(this, next);
 	}
 	
 	@Override
@@ -35,7 +36,8 @@ public class GetIntentEdge extends EdgeFunctionTemplate {
 			if (!intSetSource.bottom()) {
 				Set<JSONObject> intentSet = new HashSet<JSONObject>();
 				for (Integer i: intSetSource.valueSet()) {
-					intentSet.add(iccLogs.getJSONObject(String.valueOf(i)));
+					JSONObject jo = Utility.iccToIntent(iccLogs.getJSONObject(String.valueOf(i)));
+					if (jo != null) intentSet.add(jo);
 				}
 				return new IntentValue(intentSet);
 			}
@@ -47,7 +49,7 @@ public class GetIntentEdge extends EdgeFunctionTemplate {
 	public EdgeFunction<GeneralValue> joinWithFirstEdge(EdgeFunction<GeneralValue> otherFunction){
 		if (otherFunction instanceof GetIntentEdge) {
 			GetIntentEdge otherIntentEdge = (GetIntentEdge) otherFunction;
-			if (otherIntentEdge.iccLogs == iccLogs) return this;
+			if (equals(otherIntentEdge)) return this;
 		}
 		return new AllBottom<GeneralValue>(BottomValue.v());
 	}
@@ -63,6 +65,6 @@ public class GetIntentEdge extends EdgeFunctionTemplate {
 	
 	@Override
 	public String edgeToString(){
-		return "GetIntentEdge";
+		return "GetIntentEdge()";
 	}
 }

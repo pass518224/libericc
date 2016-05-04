@@ -1,6 +1,9 @@
 package hisdroid;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import heros.InterproceduralCFG;
@@ -8,6 +11,7 @@ import heros.solver.IDESolver;
 import hisdroid.ide.IDEProblem;
 import hisdroid.value.GeneralValue;
 import hisdroid.value.IntValue;
+import hisdroid.value.NullValue;
 import soot.Local;
 import soot.SootMethod;
 import soot.Unit;
@@ -23,6 +27,7 @@ import soot.jimple.LeExpr;
 import soot.jimple.LtExpr;
 import soot.jimple.NeExpr;
 import soot.jimple.NegExpr;
+import soot.jimple.NullConstant;
 import soot.jimple.toolkits.ide.DefaultJimpleIDETabulationProblem;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 
@@ -36,9 +41,11 @@ public class IDEAnalyzer implements Analyzer{
 	
 	@Override
 	public void analyze(SootMethod mainMethod) {
+		logger.info("IDE analysis starts");
 		problem = new IDEProblem(new JimpleBasedInterproceduralCFG(), mainMethod);
 		solver = new IDESolver<Unit, Value, SootMethod, GeneralValue, InterproceduralCFG<Unit, SootMethod>>(problem);
 		solver.solve();
+		logger.info("IDE analysis ends");
 	}
 	
 	@Override
@@ -49,8 +56,7 @@ public class IDEAnalyzer implements Analyzer{
 	@Override
 	public TriLogic branchAt(IfStmt stmt){
 		Map<Value, GeneralValue> map = solver.resultsAt(stmt);
-		IfStmt ifs = (IfStmt) stmt;
-		Value condition = ifs.getCondition();
+		Value condition = stmt.getCondition();
 		
 		if (condition instanceof Local || condition instanceof FieldRef){
 			if (map.containsKey(condition)) {
@@ -69,8 +75,13 @@ public class IDEAnalyzer implements Analyzer{
 			ConditionExpr conditionExpr = (ConditionExpr) condition;
 			Value op1 = conditionExpr.getOp1();
 			Value op2 = conditionExpr.getOp2();
+			// Test null
+			if ((op1 instanceof NullConstant || op1 instanceof NullValue) && (op2 instanceof NullConstant || op2 instanceof NullValue)) {
+				return TriLogic.True;
+			}
+			// Test int
 			IntValue iv1 = null, iv2 = null;
-			
+			// Get int value from op1
 			if (map.containsKey(op1)) {
 				GeneralValue v1 = map.get(op1);
 				if (v1 instanceof IntValue) {
@@ -79,11 +90,10 @@ public class IDEAnalyzer implements Analyzer{
 				else return TriLogic.Unknown;
 			}
 			else if (op1 instanceof IntConstant) {
-				IntConstant ic1 = (IntConstant) op1; 
-				iv1 = new IntValue(ic1.value);
+				iv1 = new IntValue(((IntConstant) op1).value);
 			}
 			else return TriLogic.Unknown;
-			
+			// Get int value from op2
 			if (map.containsKey(op2)) {
 				GeneralValue v2 = map.get(op2);
 				if (v2 instanceof IntValue) {
@@ -92,89 +102,53 @@ public class IDEAnalyzer implements Analyzer{
 				else return TriLogic.Unknown;
 			}
 			else if (op2 instanceof IntConstant) {
-				IntConstant ic2 = (IntConstant) op2; 
-				iv2 = new IntValue(ic2.value);
+				iv2 = new IntValue(((IntConstant) op2).value);
 			}
 			else return TriLogic.Unknown;
 
+			// return unknown if bottom
 			if (iv1.bottom() || iv2.bottom()) return TriLogic.Unknown;
+			// Test value
 			if (condition instanceof EqExpr) {
 				if (iv1.valueSet().size() == 1 && iv2.valueSet().size() == 1){
-					return TriLogic.toTriLogic(iv1.valueSet().iterator().next() == iv2.valueSet().iterator().next()); 
+					return TriLogic.toTriLogic(iv1.valueSet().iterator().next() == iv2.valueSet().iterator().next());
 				}
+				Set<Integer> intersection = new HashSet<Integer>(iv1.valueSet());
+				intersection.retainAll(iv2.valueSet());
+				if (intersection.isEmpty()) return TriLogic.False;
 				return TriLogic.Unknown;
-			}
-			if (condition instanceof GeExpr) {
-				boolean allTrue = true, allFalse = true;
-				for (int i: iv1.valueSet()) {
-					for (int j: iv2.valueSet()) {
-						if (i>=j) {
-							allFalse = false;
-						}
-						else {
-							allTrue = false;
-						}
-						if (!allTrue && !allFalse) return TriLogic.Unknown;
-					}
-				}
-				if (allTrue && !allFalse) return TriLogic.True;
-				if (!allTrue && allFalse) return TriLogic.False;
-			}
-			if (condition instanceof GtExpr) {
-				boolean allTrue = true, allFalse = true;
-				for (int i: iv1.valueSet()) {
-					for (int j: iv2.valueSet()) {
-						if (i>j) {
-							allFalse = false;
-						}
-						else {
-							allTrue = false;
-						}
-						if (!allTrue && !allFalse) return TriLogic.Unknown;
-					}
-				}
-				if (allTrue && !allFalse) return TriLogic.True;
-				if (!allTrue && allFalse) return TriLogic.False;
-			}
-			if (condition instanceof LeExpr) {
-				boolean allTrue = true, allFalse = true;
-				for (int i: iv1.valueSet()) {
-					for (int j: iv2.valueSet()) {
-						if (i<=j) {
-							allFalse = false;
-						}
-						else {
-							allTrue = false;
-						}
-						if (!allTrue && !allFalse) return TriLogic.Unknown;
-					}
-				}
-				if (allTrue && !allFalse) return TriLogic.True;
-				if (!allTrue && allFalse) return TriLogic.False;
-			}
-			if (condition instanceof LtExpr) {
-				boolean allTrue = true, allFalse = true;
-				for (int i: iv1.valueSet()) {
-					for (int j: iv2.valueSet()) {
-						if (i<j) {
-							allFalse = false;
-						}
-						else {
-							allTrue = false;
-						}
-						if (!allTrue && !allFalse) return TriLogic.Unknown;
-					}
-				}
-				if (allTrue && !allFalse) return TriLogic.True;
-				if (!allTrue && allFalse) return TriLogic.False;
 			}
 			if (condition instanceof NeExpr) {
 				if (iv1.valueSet().size() == 1 && iv2.valueSet().size() == 1){
-					return TriLogic.toTriLogic(iv1.valueSet().iterator().next() != iv2.valueSet().iterator().next()); 
+					return TriLogic.toTriLogic(iv1.valueSet().iterator().next() != iv2.valueSet().iterator().next());
 				}
+				Set<Integer> intersection = new HashSet<Integer>(iv1.valueSet());
+				intersection.retainAll(iv2.valueSet());
+				if (intersection.isEmpty()) return TriLogic.True;
+				return TriLogic.Unknown;
+			}
+			if (condition instanceof GeExpr) {
+				if (Collections.min(iv1.valueSet()) >= Collections.max(iv2.valueSet())) return TriLogic.True;
+				if (Collections.max(iv1.valueSet()) < Collections.min(iv2.valueSet())) return TriLogic.False;
+				return TriLogic.Unknown;
+			}
+			if (condition instanceof GtExpr) {
+				if (Collections.min(iv1.valueSet()) > Collections.max(iv2.valueSet())) return TriLogic.True;
+				if (Collections.max(iv1.valueSet()) <= Collections.min(iv2.valueSet())) return TriLogic.False;
+				return TriLogic.Unknown;
+			}
+			if (condition instanceof LeExpr) {
+				if (Collections.min(iv1.valueSet()) <= Collections.max(iv2.valueSet())) return TriLogic.True;
+				if (Collections.max(iv1.valueSet()) > Collections.min(iv2.valueSet())) return TriLogic.False;
+				return TriLogic.Unknown;
+			}
+			if (condition instanceof LtExpr) {
+				if (Collections.min(iv1.valueSet()) < Collections.max(iv2.valueSet())) return TriLogic.True;
+				if (Collections.max(iv1.valueSet()) >= Collections.min(iv2.valueSet())) return TriLogic.False;
 				return TriLogic.Unknown;
 			}
 		}
 		return TriLogic.Unknown;
 	}
+	
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 import hisdroid.callhandler.CallHandler.MethodSig;
 import hisdroid.callhandler.intent.*;
 import hisdroid.callhandler.bundle.*;
+import hisdroid.callhandler.lifecycle.*;
 import soot.Scene;
 import soot.SootClass;
 import soot.SootMethod;
@@ -19,6 +20,13 @@ public class Handlers {
 		insertHandler(new StringInitHandler());
 		insertHandler(new GetIntentHandler());
 
+		// Life Cycle
+		insertHandler(new ActivityOnActivityResultHandler());
+		insertHandler(new ServiceOnBindHandler());
+		insertHandler(new ServiceOnUnbindHandler());
+		insertHandler(new ServiceOnStartCommandHandler());
+		insertHandler(new IntentServiceOnHandleIntentHandler());
+		// Intent
 		insertHandler(new IntentGetActionHandler());
 		insertHandler(new IntentGetBooleanHandler());
 		insertHandler(new IntentGetBundleHandler());
@@ -32,7 +40,7 @@ public class Handlers {
 		insertHandler(new IntentGetShortHandler());
 		insertHandler(new IntentGetStringHandler());
 		insertHandler(new IntentHasExtraHandler());
-		
+		// Bundle
 		insertHandler(new BundleGetBooleanHandler());
 		insertHandler(new BundleGetBundleHandler());
 		insertHandler(new BundleGetByteHandler());

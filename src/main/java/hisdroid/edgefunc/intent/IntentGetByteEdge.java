@@ -60,9 +60,9 @@ public class IntentGetByteEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("Byte")) {
-						byteSet.add(Byte.valueOf(v.getString("Value")));
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("20")) {
+						byteSet.add(Byte.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

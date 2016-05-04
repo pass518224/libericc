@@ -39,11 +39,19 @@ import soot.IntType;
 import soot.Local;
 import soot.LongType;
 import soot.jimple.AssignStmt;
+import soot.jimple.BinopExpr;
 import soot.jimple.CastExpr;
+import soot.jimple.CmpExpr;
+import soot.jimple.CmpgExpr;
+import soot.jimple.CmplExpr;
 import soot.jimple.Constant;
 import soot.jimple.DefinitionStmt;
+import soot.jimple.DoubleConstant;
+import soot.jimple.FieldRef;
+import soot.jimple.FloatConstant;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeExpr;
+import soot.jimple.LongConstant;
 import soot.jimple.ReturnStmt;
 import soot.jimple.ReturnVoidStmt;
 import soot.jimple.StaticFieldRef;
@@ -65,7 +73,6 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 	
 	public IDEProblem(InterproceduralCFG<Unit,SootMethod> icfg, SootMethod mainMethod) {
 		super(icfg);
-		logger.info("Start IDE analysis");
 		this.mainMethod = mainMethod;
 		this.icfg = icfg;
 	}
@@ -181,6 +188,24 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 				}
 				return allTopFunction();
 			}
+			if (rightOp instanceof CmpExpr || rightOp instanceof CmplExpr || rightOp instanceof CmpgExpr) {
+				BinopExpr be = (BinopExpr) rightOp;
+				Value op1 = be.getOp1(), op2 = be.getOp2();
+				if (op1 instanceof Constant && (op2 instanceof Local || op2 instanceof FieldRef)) {
+					if (currNode.equivTo(op2) && leftOp.equivTo(leftOp)) {
+						if (op1 instanceof LongConstant) return new CompareLongEdge((LongConstant)op1, true);
+						if (op1 instanceof DoubleConstant) return new CompareDoubleEdge((DoubleConstant)op1, true);
+						if (op1 instanceof FloatConstant) return new CompareFloatEdge((FloatConstant)op1, true);
+					}
+				}
+				if (op2 instanceof Constant && (op1 instanceof Local || op1 instanceof FieldRef)) {
+					if (currNode.equivTo(op1) && leftOp.equivTo(leftOp)) {
+						if (op2 instanceof LongConstant) return new CompareLongEdge((LongConstant)op2, false);
+						if (op2 instanceof DoubleConstant) return new CompareDoubleEdge((DoubleConstant)op2, false);
+						if (op2 instanceof FloatConstant) return new CompareFloatEdge((FloatConstant)op2, false);
+					}
+				}
+			}
 		}
 		return EdgeIdentity.v();
 	}
@@ -196,7 +221,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 		
 		if (srcNode.equivTo(zeroValue()) && !destNode.equivTo(zeroValue())) {
 			int ind = destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode);
-			Value arg = stmt.getInvokeExpr().getArgs().get(ind);
+			Value arg = ie.getArgs().get(ind);
 			if (arg instanceof Constant) {
 				return utility.getEdgeFromConstant((Constant)arg);
 			}
@@ -246,6 +271,16 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			if (rightOp instanceof CastExpr) {
 				Value r = ((CastExpr)rightOp).getOp();
 				return new Transfer<Value>(leftOp, r);
+			}
+			if (rightOp instanceof CmpExpr || rightOp instanceof CmplExpr || rightOp instanceof CmpgExpr) {
+				BinopExpr be = (BinopExpr) rightOp;
+				Value op1 = be.getOp1(), op2 = be.getOp2();
+				if ((op1 instanceof LongConstant || op1 instanceof DoubleConstant || op1 instanceof FloatConstant) && (op2 instanceof Local || op2 instanceof FieldRef)) {
+					return new Transfer<Value>(leftOp, op2);
+				}
+				if ((op2 instanceof LongConstant || op2 instanceof DoubleConstant || op2 instanceof FloatConstant) && (op1 instanceof Local || op1 instanceof FieldRef)) {
+					return new Transfer<Value>(leftOp, op1);
+				}
 			}
 			return new FlowFunction<Value>(){
 				@Override
@@ -316,6 +351,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 		for(int i=0;i<destinationMethod.getParameterCount();i++) {
 			paramLocals.add(destinationMethod.getActiveBody().getParameterLocal(i));
 		}
+		//assert callArgs.size() == paramLocals.size() : callStmt + " " + destinationMethod;
 		
 		return new FlowFunction<Value>() {
 			@Override
@@ -323,7 +359,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 				Set<Value> ret = new HashSet<Value>();
 				if (source.equivTo(zeroValue())) {
 					for (int i=0; i<callArgs.size(); i++) {
-						if (callArgs.get(i) instanceof Constant) {
+						if (callArgs.get(i) instanceof Constant && i < paramLocals.size()) {
 							ret.add(paramLocals.get(i));
 						}
 					}
@@ -333,7 +369,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 						ret.add(source);
 					}
 					for (int i=0; i<callArgs.size(); i++) {
-						if (callArgs.get(i).equivTo(source)) {
+						if (callArgs.get(i).equivTo(source) && i < paramLocals.size()) {
 							ret.add(paramLocals.get(i));
 						}
 					}

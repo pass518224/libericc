@@ -61,8 +61,8 @@ public class BundleGetCharEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("Char")) {
-						charSet.add(v.getString("Value").charAt(0));
+					if (v.getString("type").equals("10")) {
+						charSet.add(v.getString("_").charAt(0));
 						added = true;
 					}
 				} catch (JSONException e) {}

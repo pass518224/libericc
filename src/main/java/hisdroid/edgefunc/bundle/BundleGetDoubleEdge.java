@@ -61,8 +61,8 @@ public class BundleGetDoubleEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("Double")) {
-						doubleSet.add(Double.valueOf(v.getString("Value")));
+					if (v.getString("type").equals("8")) {
+						doubleSet.add(Double.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

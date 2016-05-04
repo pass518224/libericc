@@ -60,9 +60,9 @@ public class IntentGetDoubleEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("Double")) {
-						doubleSet.add(Double.valueOf(v.getString("Value")));
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("8")) {
+						doubleSet.add(Double.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

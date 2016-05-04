@@ -48,9 +48,9 @@ public class IntentGetStringEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("String")) {
-						stringSet.add(v.getString("Value"));
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("0")) {
+						stringSet.add(v.getString("_"));
 						added = true;
 					}
 				} catch (JSONException e) {}

@@ -60,8 +60,8 @@ public class BundleGetLongEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("Long")) {
-						longSet.add(Long.valueOf(v.getString("Value")));
+					if (v.getString("type").equals("6")) {
+						longSet.add(Long.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

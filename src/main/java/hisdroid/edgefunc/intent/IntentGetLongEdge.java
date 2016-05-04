@@ -59,9 +59,9 @@ public class IntentGetLongEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("Long")) {
-						longSet.add(Long.valueOf(v.getString("Value")));
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("6")) {
+						longSet.add(Long.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

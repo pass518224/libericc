@@ -60,9 +60,9 @@ public class IntentGetCharEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("Extras").getJSONObject(name);
-					if (v.getString("Type").equals("Char")) {
-						charSet.add(v.getString("Value").charAt(0));
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					if (v.getString("type").equals("10")) {
+						charSet.add(v.getString("_").charAt(0));
 						added = true;
 					}
 				} catch (JSONException e) {}

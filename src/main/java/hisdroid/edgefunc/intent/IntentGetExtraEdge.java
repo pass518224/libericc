@@ -29,7 +29,7 @@ public class IntentGetExtraEdge extends EdgeFunctionTemplate {
 			Set<JSONObject> bundleSet = new HashSet<JSONObject>();
 			for (JSONObject i: intentSource.intents()) {
 				try {
-					bundleSet.add(i.getJSONObject("Extras"));
+					bundleSet.add(i.getJSONObject("mExtras"));
 				}
 				catch (JSONException e) {
 					return new BundleValue();

@@ -60,8 +60,8 @@ public class BundleGetIntEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("Int")) {
-						intSet.add(Integer.valueOf(v.getString("Value")));
+					if (v.getString("type").equals("1")) {
+						intSet.add(Integer.valueOf(v.getString("_")));
 						added = true;
 					}
 				} catch (JSONException e) {}

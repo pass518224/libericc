@@ -51,9 +51,9 @@ public class Pruner {
 			for (Value key : map.keySet()) {
 				logger.info("\t"+key + ": " + map.get(key));
 			}
-			logger.info(u.toString());//*/
+			logger.info(u.toString());
 			if (u instanceof IfStmt) {
-				logger.info("\t"+analyzer.branchAt((IfStmt)u));
+				logger.info("\tResult: "+analyzer.branchAt((IfStmt)u));
 			}
 		}
 		

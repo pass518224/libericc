@@ -28,7 +28,7 @@ public class IntentGetActionEdge extends EdgeFunctionTemplate {
 			Set<String> bundleSet = new HashSet<String>();
 			for (JSONObject i: intentSource.intents()) {
 				try {
-					bundleSet.add(i.getString("Actions"));
+					bundleSet.add(i.getString("Action"));
 				}
 				catch (JSONException e) {
 					return new StringValue();

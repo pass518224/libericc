@@ -58,8 +58,8 @@ public class BundleGetBooleanEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("Boolean")) {
-						if (Boolean.valueOf(v.getString("Value"))) t =  true;
+					if (v.getString("type").equals("9")) {
+						if (Boolean.valueOf(v.getString("_"))) t =  true;
 						else f = true;
 						added = true;
 					}

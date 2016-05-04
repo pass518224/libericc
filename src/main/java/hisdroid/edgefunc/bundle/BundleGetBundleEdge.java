@@ -49,8 +49,8 @@ public class BundleGetBundleEdge extends EdgeFunctionTemplate {
 				boolean added = false;
 				try {
 					JSONObject v = b.getJSONObject(name);
-					if (v.getString("Type").equals("Bundle")) {
-						bundleSet.add(v.getJSONObject("Value"));
+					if (v.getString("type").equals("3")) {
+						bundleSet.add(v.getJSONObject("_"));
 						added = true;
 					}
 				} catch (JSONException e) {}
