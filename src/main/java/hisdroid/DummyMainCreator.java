@@ -215,6 +215,23 @@ public class DummyMainCreator {
 						addMethodCall(tmpLocal, targetClass, "onDestroy");
 					}
 					break;
+				case "SCHEDULE_RECEIVER_TRANSACTION":
+					targetClass = iccLog.getJSONObject("intent").getJSONObject("mComponent").getString("mClass");
+					tmpLocal = classToLocal.get(targetClass);
+					if (tmpLocal == null) {
+						tmpLocal = Jimple.v().newLocal(targetClass.replace(".","_"), RefType.v(targetClass));
+						body.getLocals().add(tmpLocal);
+						classToLocal.put(targetClass, tmpLocal);
+						Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
+						Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
+						Unit clinitStmt = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(Scene.v().getSootClass(targetClass).getMethod("void <clinit>()").makeRef()));
+						Unit initStmt = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmpLocal, Scene.v().getSootClass(targetClass).getMethod("void <init>()").makeRef()));
+						units.addLast(assignStmt);
+						units.addLast(clinitStmt);
+						units.addLast(initStmt);
+					}
+					addMethodCall(tmpLocal, targetClass, "onReceive", NullConstant.v(), NullConstant.v());
+					break;
 				}
 			}
 		}

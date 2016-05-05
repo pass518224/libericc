@@ -60,7 +60,7 @@ public class BundleGetByteEdge extends EdgeFunctionTemplate {
 			for (JSONObject b: bundleSource.bundles()) {
 				boolean added = false;
 				try {
-					JSONObject v = b.getJSONObject(name);
+					JSONObject v = b.getJSONObject("map").getJSONObject(name);
 					if (v.getString("type").equals("20")) {
 						byteSet.add(Byte.valueOf(v.getString("_")));
 						added = true;

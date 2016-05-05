@@ -26,6 +26,7 @@ public class Handlers {
 		insertHandler(new ServiceOnUnbindHandler());
 		insertHandler(new ServiceOnStartCommandHandler());
 		insertHandler(new IntentServiceOnHandleIntentHandler());
+		insertHandler(new BroadcastReceiverOnReceiveHandler());
 		// Intent
 		insertHandler(new IntentGetActionHandler());
 		insertHandler(new IntentGetBooleanHandler());

@@ -60,7 +60,7 @@ public class BundleGetCharEdge extends EdgeFunctionTemplate {
 			for (JSONObject b: bundleSource.bundles()) {
 				boolean added = false;
 				try {
-					JSONObject v = b.getJSONObject(name);
+					JSONObject v = b.getJSONObject("map").getJSONObject(name);
 					if (v.getString("type").equals("10")) {
 						charSet.add(v.getString("_").charAt(0));
 						added = true;

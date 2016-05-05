@@ -14,6 +14,7 @@ public class Utility {
 			case "SCHEDULE_LAUNCH_ACTIVITY_TRANSACTION":
 			case "SCHEDULE_BIND_SERVICE_TRANSACTION":
 			case "SCHEDULE_UNBIND_SERVICE_TRANSACTION":
+			case "SCHEDULE_RECEIVER_TRANSACTION":
 				return icc.getJSONObject("intent");
 			default:
 				return null;

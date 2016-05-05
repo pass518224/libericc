@@ -59,7 +59,7 @@ public class BundleGetShortEdge extends EdgeFunctionTemplate {
 			for (JSONObject b: bundleSource.bundles()) {
 				boolean added = false;
 				try {
-					JSONObject v = b.getJSONObject(name);
+					JSONObject v = b.getJSONObject("map").getJSONObject(name);
 					if (v.getString("type").equals("5")) {
 						shortSet.add(Short.valueOf(v.getString("_")));
 						added = true;

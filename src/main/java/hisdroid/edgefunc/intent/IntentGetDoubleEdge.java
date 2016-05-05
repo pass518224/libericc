@@ -60,7 +60,7 @@ public class IntentGetDoubleEdge extends EdgeFunctionTemplate {
 			for (JSONObject i: intentSource.intents()) {
 				boolean added = false;
 				try {
-					JSONObject v = i.getJSONObject("mExtras").getJSONObject(name);
+					JSONObject v = i.getJSONObject("mExtras").getJSONObject("map").getJSONObject(name);
 					if (v.getString("type").equals("8")) {
 						doubleSet.add(Double.valueOf(v.getString("_")));
 						added = true;
