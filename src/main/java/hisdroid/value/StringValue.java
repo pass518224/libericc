@@ -7,8 +7,6 @@ import hisdroid.TriLogic;
 import hisdroid.value.interfaces.EqualableGeneralValue;
 
 public class StringValue extends DataValue<String> implements EqualableGeneralValue {
-	Set<String> valueSet;
-	boolean bottom;
 	
 	public StringValue(){
 		super(String.class);
