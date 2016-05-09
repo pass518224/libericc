@@ -1,55 +1,27 @@
 package hisdroid.value;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 import hisdroid.TriLogic;
 import hisdroid.value.interfaces.EqualableGeneralValue;
 
-public class StringValue extends GeneralValue implements EqualableGeneralValue {
+public class StringValue extends DataValue<String> implements EqualableGeneralValue {
 	Set<String> valueSet;
 	boolean bottom;
 	
 	public StringValue(){
-		bottom = true;
+		super(String.class);
 	}
 		
 	public StringValue(String v){
-		this(Collections.singleton(v));
+		super(String.class, v);
 	}
 	
 	public StringValue(Set<String> vset){
-		valueSet = vset;
-		bottom = false;
+		super(String.class, vset);
 	}
 	
-	@Override
-	public GeneralValue joinWith(GeneralValue otherValue){
-		if (otherValue instanceof TopValue) return this;
-		if (otherValue instanceof StringValue) {
-			StringValue osv = (StringValue) otherValue;
-			if (bottom) return this;
-			if (osv.bottom) return osv;
-			Set<String> newSet = new HashSet<String>(valueSet);
-			newSet.addAll(osv.valueSet);
-			return new StringValue(newSet);
-		}
-		return BottomValue.v();
-	}
-	
-	public Set<String> valueSet() { return valueSet; }
-	public boolean bottom() { return bottom; }
-	
-	@Override
-	public boolean equals(Object o){
-		if (o instanceof StringValue) {
-			StringValue osv = (StringValue) o;
-			return bottom && osv.bottom || !bottom && !osv.bottom && valueSet.equals(osv.valueSet);
-		}
-		return false;
-	}
-
 	@Override
 	public String toString(){
 		if (bottom) return "Unknown String";

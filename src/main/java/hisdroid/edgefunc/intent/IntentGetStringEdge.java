@@ -1,88 +1,57 @@
 package hisdroid.edgefunc.intent;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import heros.EdgeFunction;
-import hisdroid.edgefunc.AllBottom;
 import hisdroid.edgefunc.EdgeFunctionTemplate;
-import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.IntentValue;
 import hisdroid.value.StringValue;
 
-public class IntentGetStringEdge extends EdgeFunctionTemplate {
+public class IntentGetStringEdge extends IntentGetDataEdge<String> {
 	String name;
 	
 	public IntentGetStringEdge(){
-		this.name = null;
+		super(String.class);
 	}
 	
 	public IntentGetStringEdge(String name){
-		this.name = name;
+		super(String.class, name);
 	}
 
-	public IntentGetStringEdge(String name, EdgeFunction<GeneralValue> next){
-		this.name = name;
-		this.next = next;
-	}
-	
-	public String name() {
-		return name;
+	public IntentGetStringEdge(IntentGetStringEdge old, EdgeFunction<GeneralValue> next){
+		super(old, next);
 	}
 	
 	@Override
 	public EdgeFunctionTemplate copy() {
-		return new IntentGetStringEdge(name, next);
+		return new IntentGetStringEdge(this, next);
 	}
 
 	@Override
-	protected GeneralValue computeTargetImplementation(GeneralValue source) {
-		if (source instanceof IntentValue && name != null) {
-			IntentValue intentSource = (IntentValue) source;
-			if (intentSource.bottom()) return new StringValue();
-			Set<String> stringSet = new HashSet<String>();
-			for (JSONObject i: intentSource.intents()) {
-				boolean added = false;
-				try {
-					JSONObject v = i.getJSONObject("mExtras").getJSONObject("map").getJSONObject(name);
-					if (v.getString("type").equals("0")) {
-						stringSet.add(v.getString("_"));
-						added = true;
-					}
-				} catch (JSONException e) {}
-				if (!added) return new StringValue();
-			}
-			return new StringValue(stringSet);
-		}
+	GeneralValue unknownGeneralValue() {
 		return new StringValue();
 	}
-
+	
 	@Override
-	public EdgeFunction<GeneralValue> joinWithFirstEdge(EdgeFunction<GeneralValue> otherFunction) {
-		if (otherFunction instanceof IntentGetStringEdge) {
-			IntentGetStringEdge otherStringEdge = (IntentGetStringEdge) otherFunction;
-			if (name.equals(otherStringEdge.name)) return this;
-			return new IntentGetStringEdge();
-		}
-		return new AllBottom<GeneralValue>(BottomValue.v());
+	GeneralValue knownGeneralValue(Set<String> vset) {
+		return new StringValue(vset);
 	}
 
 	@Override
-	protected boolean equalToFirstEdge(EdgeFunction<GeneralValue> other) {
-		if (other instanceof IntentGetStringEdge) {
-			IntentGetStringEdge otherStringEdge = (IntentGetStringEdge) other;
-			return name.equals(otherStringEdge.name);
-		}
-		return false;
+	String parcelTypeNumber() {
+		return "0";
+	}
+
+	@Override
+	String mappedValueToT(JSONObject v) {
+		return v.getString("_");
 	}
 
 	@Override
 	public String edgeToString() {
-		if (name == null) return "IntentGetStringEdge()";
+		if (!knownName) return "IntentGetStringEdge()";
 		else return String.format("IntentGetStringEdge(\"%s\")", name);
 	}
 

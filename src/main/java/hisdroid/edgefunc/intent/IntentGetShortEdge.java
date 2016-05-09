@@ -34,7 +34,7 @@ public class IntentGetShortEdge extends IntentGetPrimitiveEdge<Short> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "IntentGetShortEdge()";
 		}
 		return String.format("IntentGetShortEdge(\"%s\")",name);

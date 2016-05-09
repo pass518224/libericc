@@ -34,7 +34,7 @@ public class IntentGetDoubleEdge extends IntentGetPrimitiveEdge<Double> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "IntentGetDoubleEdge()";
 		}
 		return String.format("IntentGetDoubleEdge(\"%s\")",name);

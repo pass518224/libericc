@@ -22,10 +22,6 @@ public class BundleGetLongEdge extends BundleGetPrimitiveEdge<Long> {
 		super(old, next);
 	}
 	
-	public String name() { return name; }
-	public boolean knownDefault() { return knownDefault; }
-	public Long defaultValue() { return defaultValue; }
-	
 	Long stringToT(String s){
 		return Long.parseLong(s);
 	}
@@ -37,7 +33,7 @@ public class BundleGetLongEdge extends BundleGetPrimitiveEdge<Long> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "BundleGetLongEdge()";
 		}
 		return String.format("BundleGetLongEdge(\"%s\")",name);

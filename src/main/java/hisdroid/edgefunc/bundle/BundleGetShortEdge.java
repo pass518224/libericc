@@ -22,10 +22,6 @@ public class BundleGetShortEdge extends BundleGetPrimitiveEdge<Short> {
 		super(old, next);
 	}
 	
-	public String name() { return name; }
-	public boolean knownDefault() { return knownDefault; }
-	public Short defaultValue() { return defaultValue; }
-	
 	Short stringToT(String s){
 		return Short.parseShort(s);
 	}
@@ -37,7 +33,7 @@ public class BundleGetShortEdge extends BundleGetPrimitiveEdge<Short> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "BundleGetShortEdge()";
 		}
 		return String.format("BundleGetShortEdge(\"%s\")",name);

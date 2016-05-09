@@ -34,7 +34,7 @@ public class IntentGetLongEdge extends IntentGetPrimitiveEdge<Long> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "IntentGetLongEdge()";
 		}
 		return String.format("IntentGetLongEdge(\"%s\")",name);

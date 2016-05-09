@@ -34,7 +34,7 @@ public class IntentGetFloatEdge extends IntentGetPrimitiveEdge<Float> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "IntentGetFloatEdge()";
 		}
 		return String.format("IntentGetFloatEdge(\"%s\")",name);

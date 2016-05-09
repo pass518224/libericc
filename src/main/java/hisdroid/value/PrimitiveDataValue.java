@@ -7,42 +7,19 @@ import java.util.Set;
 import hisdroid.TriLogic;
 import hisdroid.value.interfaces.ComparableGeneralValue;
 
-public class PrimitiveDataValue<T extends Comparable<T>> extends GeneralValue implements ComparableGeneralValue {
-	Class<T> type;
-	Set<T> valueSet;
-	boolean bottom;
+public class PrimitiveDataValue<T extends Comparable<T>> extends DataValue<T> implements ComparableGeneralValue {
 	
 	public PrimitiveDataValue(Class<T> type){
-		this(type, new HashSet<T>());
+		super(type);
 	}
 	
 	public PrimitiveDataValue(Class<T> type, T v){
-		this(type, Collections.singleton(v));
+		super(type, v);
 	}
 	
 	public PrimitiveDataValue(Class<T> type, Set<T> vset){
-		this.type = type;
-		valueSet = vset;
-		bottom = vset.isEmpty();
+		super(type, vset);
 	}
-	
-	@Override
-	public GeneralValue joinWith(GeneralValue otherValue){
-		if (otherValue instanceof TopValue) return this;
-		if (otherValue instanceof PrimitiveDataValue) {
-			if (type.equals(((PrimitiveDataValue<?>) otherValue).type)) {
-				@SuppressWarnings("unchecked")
-				PrimitiveDataValue<T> other = (PrimitiveDataValue<T>) otherValue;
-				if (bottom) return this;
-				if (other.bottom) return other;
-				Set<T> newSet = new HashSet<T>(valueSet);
-				newSet.addAll(other.valueSet);
-				return new PrimitiveDataValue<T>(type, newSet);
-			}
-		}
-		return BottomValue.v();
-	}
-	
 
 	@Override
 	public TriLogic triLogic(){
@@ -51,36 +28,18 @@ public class PrimitiveDataValue<T extends Comparable<T>> extends GeneralValue im
 			else if (valueSet.size() == 1 && valueSet.contains(0)) return TriLogic.False;
 			else if (valueSet.size() >= 1 && !valueSet.contains(0)) return TriLogic.True;
 		}
-		if (type.equals(Long.class)) {
+		else if (type.equals(Long.class)) {
 			if (bottom) return TriLogic.Unknown;
 			else if (valueSet.size() == 1 && valueSet.contains(0L)) return TriLogic.False;
 			else if (valueSet.size() >= 1 && !valueSet.contains(0L)) return TriLogic.True;
 		}
+		else if (type.equals(Boolean.class)) {
+			if (bottom) return TriLogic.Unknown;
+			else if (valueSet.size() == 1 && valueSet.contains(false)) return TriLogic.False;
+			else if (valueSet.size() == 1 && valueSet.contains(true)) return TriLogic.True;
+		}
 		return TriLogic.Unknown;
 	}
-	
-	public Class<T> type() { return type; }
-	public Set<T> valueSet() { return valueSet; }
-	public boolean bottom() { return bottom; }
-	
-	@Override
-	public boolean equals(Object o){
-		if (o instanceof PrimitiveDataValue) {
-			if (type.equals(((PrimitiveDataValue<?>)o).type)) {
-				@SuppressWarnings("unchecked")
-				PrimitiveDataValue<T> other = (PrimitiveDataValue<T>) o;
-				return bottom && other.bottom || !bottom && !other.bottom && valueSet.equals(other.valueSet);
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public String toString(){
-		if (bottom) return "Unknown " + type;
-		return type + ": " + valueSet.toString();
-	}
-	
 	
 	@Override
 	public Set<Integer> cmpTo(ComparableGeneralValue rhs) {

@@ -22,10 +22,6 @@ public class BundleGetIntEdge extends BundleGetPrimitiveEdge<Integer> {
 		super(old, next);
 	}
 	
-	public String name() { return name; }
-	public boolean knownDefault() { return knownDefault; }
-	public Integer defaultValue() { return defaultValue; }
-	
 	Integer stringToT(String s){
 		return Integer.parseInt(s);
 	}
@@ -37,7 +33,7 @@ public class BundleGetIntEdge extends BundleGetPrimitiveEdge<Integer> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "BundleGetIntEdge()";
 		}
 		return String.format("BundleGetIntEdge(\"%s\")",name);

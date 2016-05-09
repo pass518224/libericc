@@ -34,7 +34,7 @@ public class IntentGetByteEdge extends IntentGetPrimitiveEdge<Byte> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "IntentGetByteEdge()";
 		}
 		return String.format("IntentGetByteEdge(\"%s\")",name);

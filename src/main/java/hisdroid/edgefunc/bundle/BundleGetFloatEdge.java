@@ -22,10 +22,6 @@ public class BundleGetFloatEdge extends BundleGetPrimitiveEdge<Float> {
 		super(old, next);
 	}
 	
-	public String name() { return name; }
-	public boolean knownDefault() { return knownDefault; }
-	public Float defaultValue() { return defaultValue; }
-	
 	Float stringToT(String s){
 		return Float.parseFloat(s);
 	}
@@ -37,7 +33,7 @@ public class BundleGetFloatEdge extends BundleGetPrimitiveEdge<Float> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "BundleGetFloatEdge()";
 		}
 		return String.format("BundleGetFloatEdge(\"%s\")",name);

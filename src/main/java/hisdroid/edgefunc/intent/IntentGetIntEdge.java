@@ -34,7 +34,7 @@ public class IntentGetIntEdge extends IntentGetPrimitiveEdge<Integer> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "IntentGetIntEdge()";
 		}
 		return String.format("IntentGetIntEdge(\"%s\")",name);

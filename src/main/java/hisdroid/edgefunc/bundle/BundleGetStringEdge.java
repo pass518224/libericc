@@ -1,49 +1,31 @@
 package hisdroid.edgefunc.bundle;
 
-import java.util.HashSet;
 import java.util.Set;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import heros.EdgeFunction;
-import hisdroid.edgefunc.AllBottom;
 import hisdroid.edgefunc.EdgeFunctionTemplate;
-import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.BundleValue;
 import hisdroid.value.StringValue;
 
-public class BundleGetStringEdge extends EdgeFunctionTemplate {
-	String name;
-	boolean knownDefault;
-	String defaultValue;
+public class BundleGetStringEdge extends BundleGetDataEdge<String> {
 	
 	public BundleGetStringEdge(){
-		this(null);
+		super(String.class);
 	}
 	
 	public BundleGetStringEdge(String name){
-		this.name = name;
-		knownDefault = false;
+		super(String.class, name);
 	}
 
 	public BundleGetStringEdge(String name, String defaultValue){
-		this.name = name;
-		knownDefault = true;
-		this.defaultValue = defaultValue;
+		super(String.class, name, defaultValue);
 	}
 	
 	public BundleGetStringEdge(BundleGetStringEdge old, EdgeFunction<GeneralValue> next){
-		this.name = old.name;
-		this.knownDefault = old.knownDefault;
-		this.defaultValue = old.defaultValue;
-		this.next = next;
+		super(old, next);
 	}
-	
-	public String name() { return name; }
-	public boolean knownDefault() { return knownDefault; }
-	public String defaultValue() { return defaultValue; }
 	
 	@Override
 	public EdgeFunctionTemplate copy() {
@@ -51,52 +33,28 @@ public class BundleGetStringEdge extends EdgeFunctionTemplate {
 	}
 
 	@Override
-	protected GeneralValue computeTargetImplementation(GeneralValue source) {
-		if (source instanceof BundleValue && name != null) {
-			BundleValue bundleSource = (BundleValue) source;
-			if (bundleSource.bottom()) return new StringValue();
-			Set<String> stringSet = new HashSet<String>();
-			for (JSONObject b: bundleSource.bundles()) {
-				boolean added = false;
-				try {
-					JSONObject v = b.getJSONObject("map").getJSONObject(name);
-					if (v.getString("type").equals("0")) {
-						stringSet.add(v.getString("_"));
-						added = true;
-					}
-				} catch (JSONException e) {}
-				if (!added) {
-					if (knownDefault) return new StringValue(defaultValue);
-					else return new StringValue();
-				}
-			}
-			return new StringValue(stringSet);
-		}
+	GeneralValue unknownGeneralValue() {
 		return new StringValue();
 	}
-
+	
 	@Override
-	public EdgeFunction<GeneralValue> joinWithFirstEdge(EdgeFunction<GeneralValue> otherFunction) {
-		if (otherFunction instanceof BundleGetStringEdge) {
-			BundleGetStringEdge otherStringEdge = (BundleGetStringEdge) otherFunction;
-			if (name.equals(otherStringEdge.name)) return this;
-			return new BundleGetStringEdge();
-		}
-		return new AllBottom<GeneralValue>(BottomValue.v());
+	GeneralValue knownGeneralValue(Set<String> vset) {
+		return new StringValue(vset);
 	}
 
 	@Override
-	protected boolean equalToFirstEdge(EdgeFunction<GeneralValue> other) {
-		if (other instanceof BundleGetStringEdge) {
-			BundleGetStringEdge otherStringEdge = (BundleGetStringEdge) other;
-			return name.equals(otherStringEdge.name) && knownDefault == otherStringEdge.knownDefault && defaultValue.equals(otherStringEdge.defaultValue);
-		}
-		return false;
+	String parcelTypeNumber() {
+		return "0";
+	}
+
+	@Override
+	String mappedValueToT(JSONObject v) {
+		return v.getString("_");
 	}
 
 	@Override
 	public String edgeToString() {
-		if (name == null) return "BundleGetStringEdge()";
+		if (!knownName) return "BundleGetStringEdge()";
 		else return String.format("BundleGetStringEdge(\"%s\")", name);
 	}
 

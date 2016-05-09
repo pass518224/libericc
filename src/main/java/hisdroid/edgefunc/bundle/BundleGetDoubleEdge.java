@@ -22,10 +22,6 @@ public class BundleGetDoubleEdge extends BundleGetPrimitiveEdge<Double> {
 		super(old, next);
 	}
 	
-	public String name() { return name; }
-	public boolean knownDefault() { return knownDefault; }
-	public Double defaultValue() { return defaultValue; }
-	
 	Double stringToT(String s){
 		return Double.parseDouble(s);
 	}
@@ -37,7 +33,7 @@ public class BundleGetDoubleEdge extends BundleGetPrimitiveEdge<Double> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "BundleGetDoubleEdge()";
 		}
 		return String.format("BundleGetDoubleEdge(\"%s\")",name);

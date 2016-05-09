@@ -7,24 +7,27 @@ import org.json.JSONObject;
 import heros.EdgeFunction;
 import hisdroid.edgefunc.AllBottom;
 import hisdroid.edgefunc.EdgeFunctionTemplate;
-import hisdroid.value.BooleanValue;
 import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;
 import hisdroid.value.IntentValue;
+import hisdroid.value.PrimitiveDataValue;
 
 public class IntentHasExtraEdge extends EdgeFunctionTemplate {
+	boolean knownName;
 	String name;
 	
 	public IntentHasExtraEdge(){
-		this.name = null;
+		knownName = false;
 	}
 	
 	public IntentHasExtraEdge(String name){
+		knownName = true;
 		this.name = name;
 	}
 
-	public IntentHasExtraEdge(String name, EdgeFunction<GeneralValue> next){
-		this.name = name;
+	public IntentHasExtraEdge(IntentHasExtraEdge old, EdgeFunction<GeneralValue> next){
+		knownName = old.knownName;
+		name = old.name;
 		this.next = next;
 	}
 	
@@ -34,14 +37,14 @@ public class IntentHasExtraEdge extends EdgeFunctionTemplate {
 	
 	@Override
 	public EdgeFunctionTemplate copy() {
-		return new IntentHasExtraEdge(name, next);
+		return new IntentHasExtraEdge(this, next);
 	}
 
 	@Override
 	protected GeneralValue computeTargetImplementation(GeneralValue source) {
 		if (source instanceof IntentValue && name != null) {
 			IntentValue intentSource = (IntentValue) source;
-			if (intentSource.bottom()) return new BooleanValue();
+			if (intentSource.bottom()) return new PrimitiveDataValue<Boolean>(Boolean.class);
 			
 			boolean t = false, f = false;  
 			for (JSONObject i: intentSource.intents()) {
@@ -49,12 +52,12 @@ public class IntentHasExtraEdge extends EdgeFunctionTemplate {
 					if (i.getJSONObject("mExtras").getJSONObject("map").has(name)) t = true;
 					else f = true;
 				} catch (JSONException e) {
-					return new BooleanValue();
+					return new PrimitiveDataValue<Boolean>(Boolean.class);
 				}
 			}
-			if (t != f) return new BooleanValue(t);
+			if (t != f) return new PrimitiveDataValue<Boolean>(Boolean.class, t);
 		}
-		return new BooleanValue();
+		return new PrimitiveDataValue<Boolean>(Boolean.class);
 	}
 
 	@Override
@@ -78,7 +81,7 @@ public class IntentHasExtraEdge extends EdgeFunctionTemplate {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) return "IntentHasExtraEdge()";
+		if (!knownName) return "IntentHasExtraEdge()";
 		else return String.format("IntenthasExtraEdge(\"%s\")", name);
 	}
 

@@ -22,10 +22,6 @@ public class BundleGetByteEdge extends BundleGetPrimitiveEdge<Byte> {
 		super(old, next);
 	}
 	
-	public String name() { return name; }
-	public boolean knownDefault() { return knownDefault; }
-	public Byte defaultValue() { return defaultValue; }
-	
 	Byte stringToT(String s){
 		return Byte.parseByte(s);
 	}
@@ -37,7 +33,7 @@ public class BundleGetByteEdge extends BundleGetPrimitiveEdge<Byte> {
 
 	@Override
 	public String edgeToString() {
-		if (name == null) {
+		if (!knownName) {
 			return "BundleGetByteEdge()";
 		}
 		return String.format("BundleGetByteEdge(\"%s\")",name);
