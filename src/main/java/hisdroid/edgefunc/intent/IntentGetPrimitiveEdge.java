@@ -96,7 +96,7 @@ public abstract class IntentGetPrimitiveEdge<T extends Comparable<T>> extends Ed
 			if (type.equals(((IntentGetPrimitiveEdge<?>)other).type)) {
 				@SuppressWarnings("unchecked")
 				IntentGetPrimitiveEdge<T> otherEdge = (IntentGetPrimitiveEdge<T>) other;
-				return name.equals(otherEdge.name) && knownDefault == otherEdge.knownDefault && defaultValue == otherEdge.defaultValue;
+				return name.equals(otherEdge.name) && knownDefault == otherEdge.knownDefault && defaultValue.equals(otherEdge.defaultValue);
 			}
 		}
 		return false;

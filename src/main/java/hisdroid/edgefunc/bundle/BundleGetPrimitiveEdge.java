@@ -96,7 +96,7 @@ public abstract class BundleGetPrimitiveEdge<T extends Comparable<T>> extends Ed
 			if (type.equals(((BundleGetPrimitiveEdge<?>)other).type)) {
 				@SuppressWarnings("unchecked")
 				BundleGetPrimitiveEdge<T> otherEdge = (BundleGetPrimitiveEdge<T>) other;
-				return name.equals(otherEdge.name) && knownDefault == otherEdge.knownDefault && defaultValue == otherEdge.defaultValue;
+				return name.equals(otherEdge.name) && knownDefault == otherEdge.knownDefault && defaultValue.equals(otherEdge.defaultValue);
 			}
 		}
 		return false;
