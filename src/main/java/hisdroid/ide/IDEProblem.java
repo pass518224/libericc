@@ -24,6 +24,7 @@ import hisdroid.ValueType;
 import hisdroid.callhandler.CallHandler;
 import hisdroid.callhandler.Handlers;
 import hisdroid.edgefunc.*;
+import hisdroid.flowfunc.KillAllExceptStaticField;
 import hisdroid.value.*;
 import soot.NullType;
 import soot.PointsToAnalysis;
@@ -46,12 +47,8 @@ import soot.jimple.CmpgExpr;
 import soot.jimple.CmplExpr;
 import soot.jimple.Constant;
 import soot.jimple.DefinitionStmt;
-import soot.jimple.DoubleConstant;
-import soot.jimple.FieldRef;
-import soot.jimple.FloatConstant;
 import soot.jimple.InstanceFieldRef;
 import soot.jimple.InvokeExpr;
-import soot.jimple.LongConstant;
 import soot.jimple.ReturnStmt;
 import soot.jimple.ReturnVoidStmt;
 import soot.jimple.StaticFieldRef;
@@ -191,20 +188,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			if (rightOp instanceof CmpExpr || rightOp instanceof CmplExpr || rightOp instanceof CmpgExpr) {
 				BinopExpr be = (BinopExpr) rightOp;
 				Value op1 = be.getOp1(), op2 = be.getOp2();
-				if (op1 instanceof Constant && (op2 instanceof Local || op2 instanceof FieldRef)) {
-					if (currNode.equivTo(op2) && leftOp.equivTo(leftOp)) {
-						if (op1 instanceof LongConstant) return new CompareLongEdge((LongConstant)op1, true);
-						if (op1 instanceof DoubleConstant) return new CompareDoubleEdge((DoubleConstant)op1, true);
-						if (op1 instanceof FloatConstant) return new CompareFloatEdge((FloatConstant)op1, true);
-					}
-				}
-				if (op2 instanceof Constant && (op1 instanceof Local || op1 instanceof FieldRef)) {
-					if (currNode.equivTo(op1) && leftOp.equivTo(leftOp)) {
-						if (op2 instanceof LongConstant) return new CompareLongEdge((LongConstant)op2, false);
-						if (op2 instanceof DoubleConstant) return new CompareDoubleEdge((DoubleConstant)op2, false);
-						if (op2 instanceof FloatConstant) return new CompareFloatEdge((FloatConstant)op2, false);
-					}
-				}
+				return new ConstantEdge(new CmpValue(curr, op1, op2));
 			}
 		}
 		return EdgeIdentity.v();
@@ -273,14 +257,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 				return new Transfer<Value>(leftOp, r);
 			}
 			if (rightOp instanceof CmpExpr || rightOp instanceof CmplExpr || rightOp instanceof CmpgExpr) {
-				BinopExpr be = (BinopExpr) rightOp;
-				Value op1 = be.getOp1(), op2 = be.getOp2();
-				if ((op1 instanceof LongConstant || op1 instanceof DoubleConstant || op1 instanceof FloatConstant) && (op2 instanceof Local || op2 instanceof FieldRef)) {
-					return new Transfer<Value>(leftOp, op2);
-				}
-				if ((op2 instanceof LongConstant || op2 instanceof DoubleConstant || op2 instanceof FloatConstant) && (op1 instanceof Local || op1 instanceof FieldRef)) {
-					return new Transfer<Value>(leftOp, op1);
-				}
+				return new Transfer<Value>(leftOp, zeroValue());
 			}
 			return new FlowFunction<Value>(){
 				@Override
@@ -335,7 +312,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 
 	FlowFunction<Value> getCallFlow(Unit callStmt, SootMethod destinationMethod) {
 		if ("<clinit>".equals(destinationMethod.getName())) {
-			return KillAll.v();
+			return KillAllExceptStaticField.v();
 		}
 		
 		Stmt stmt = (Stmt) callStmt;
@@ -416,15 +393,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			};
 		}
 		if (exitStmt instanceof ReturnVoidStmt) {
-			return new FlowFunction<Value>() {
-				@Override
-				public Set<Value> computeTargets(Value source) {
-					if (source instanceof StaticFieldRef) {
-						return Collections.singleton(source);
-					}
-					return Collections.emptySet();
-				}
-			};
+			return KillAllExceptStaticField.v();
 		} 
 		return KillAll.v();
 	}

@@ -28,118 +28,122 @@ public class CastEdge extends EdgeFunctionTemplate {
 		return new CastEdge(t, next);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public GeneralValue computeTargetImplementation(GeneralValue source) {
-		switch (t) {
-		case Int:
-			if (source instanceof IntValue) {
-				return source;
+		if (source instanceof PrimitiveDataValue) {
+			PrimitiveDataValue<?> pdvs = (PrimitiveDataValue<?>) source;  
+			switch (t) {
+			case Int:
+				if (pdvs.type().equals(Integer.class)) {
+					return pdvs;
+				}
+				else if (pdvs.type().equals(Float.class)) {
+					PrimitiveDataValue<Float> v = (PrimitiveDataValue<Float>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Integer>(Integer.class);
+					Set<Integer> s = new HashSet<Integer>();
+					for (float x: v.valueSet()) s.add((int)x);
+					return new PrimitiveDataValue<Integer>(Integer.class, s);
+				}
+				else if (pdvs.type().equals(Double.class)) {
+					PrimitiveDataValue<Double> v = (PrimitiveDataValue<Double>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Integer>(Integer.class);
+					Set<Integer> s = new HashSet<Integer>();
+					for (double x: v.valueSet()) s.add((int)x);
+					return new PrimitiveDataValue<Integer>(Integer.class, s);
+				}
+				else if (pdvs.type().equals(Long.class)) {
+					PrimitiveDataValue<Long> v = (PrimitiveDataValue<Long>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Integer>(Integer.class);
+					Set<Integer> s = new HashSet<Integer>();
+					for (long x: v.valueSet()) s.add((int)x);
+					return new PrimitiveDataValue<Integer>(Integer.class, s);
+				}
+				break;
+			case Long:
+				if (pdvs.type().equals(Long.class)) {
+					return pdvs;
+				}
+				else if (pdvs.type().equals(Integer.class)) {
+					PrimitiveDataValue<Integer> v = (PrimitiveDataValue<Integer>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Long>(Long.class);
+					Set<Long> s = new HashSet<Long>();
+					for (long x: v.valueSet()) s.add((long)x);
+					return new PrimitiveDataValue<Long>(Long.class, s);
+				}
+				else if (pdvs.type().equals(Float.class)) {
+					PrimitiveDataValue<Float> v = (PrimitiveDataValue<Float>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Long>(Long.class);
+					Set<Long> s = new HashSet<Long>();
+					for (float x: v.valueSet()) s.add((long)x);
+					return new PrimitiveDataValue<Long>(Long.class, s);
+				}
+				else if (pdvs.type().equals(Double.class)) {
+					PrimitiveDataValue<Double> v = (PrimitiveDataValue<Double>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Long>(Long.class);
+					Set<Long> s = new HashSet<Long>();
+					for (double x: v.valueSet()) s.add((long)x);
+					return new PrimitiveDataValue<Long>(Long.class, s);
+				}
+				break;
+			case Double:
+				if (pdvs.type().equals(Double.class)) {
+					return pdvs;
+				}
+				else if (pdvs.type().equals(Integer.class)) {
+					PrimitiveDataValue<Integer> v = (PrimitiveDataValue<Integer>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Double>(Double.class);
+					Set<Double> s = new HashSet<Double>();
+					for (int x: v.valueSet()) s.add((double)x);
+					return new PrimitiveDataValue<Double>(Double.class, s);
+				}
+				else if (pdvs.type().equals(Long.class)) {
+					PrimitiveDataValue<Long> v = (PrimitiveDataValue<Long>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Double>(Double.class);
+					Set<Double> s = new HashSet<Double>();
+					for (long x: v.valueSet()) s.add((double)x);
+					return new PrimitiveDataValue<Double>(Double.class, s);
+				}
+				else if (pdvs.type().equals(Float.class)) {
+					PrimitiveDataValue<Float> v = (PrimitiveDataValue<Float>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Double>(Double.class);
+					Set<Double> s = new HashSet<Double>();
+					for (float x: v.valueSet()) s.add((double)x);
+					return new PrimitiveDataValue<Double>(Double.class, s);
+				}
+				break;
+			case Float:
+				if (pdvs.type().equals(Float.class)) {
+					return pdvs;
+				}
+				else if (pdvs.type().equals(Integer.class)) {
+					PrimitiveDataValue<Integer> v = (PrimitiveDataValue<Integer>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Float>(Float.class);
+					Set<Float> s = new HashSet<Float>();
+					for (int x: v.valueSet()) s.add((float)x);
+					return new PrimitiveDataValue<Float>(Float.class, s);
+				}
+				else if (pdvs.type().equals(Long.class)) {
+					PrimitiveDataValue<Long> v = (PrimitiveDataValue<Long>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Float>(Float.class);
+					Set<Float> s = new HashSet<Float>();
+					for (long x: v.valueSet()) s.add((float)x);
+					return new PrimitiveDataValue<Float>(Float.class, s);
+				}
+				else if (pdvs.type().equals(Double.class)) {
+					PrimitiveDataValue<Double> v = (PrimitiveDataValue<Double>) pdvs;
+					if (v.bottom()) return new PrimitiveDataValue<Float>(Float.class);
+					Set<Float> s = new HashSet<Float>();
+					for (double x: v.valueSet()) s.add((float)x);
+					return new PrimitiveDataValue<Float>(Float.class, s);
+				}
+				break;
+			case Short:
+			case Byte:
+			case Boolean:
+			case Char:
+			default:
 			}
-			else if (source instanceof FloatValue) {
-				FloatValue v = (FloatValue) source;
-				if (v.bottom()) return new IntValue();
-				Set<Integer> s = new HashSet<Integer>();
-				for (float x: v.valueSet()) s.add((int)x);
-				return new IntValue(s);
-			}
-			else if (source instanceof DoubleValue) {
-				DoubleValue v = (DoubleValue) source;
-				if (v.bottom()) return new IntValue();
-				Set<Integer> s = new HashSet<Integer>();
-				for (double x: v.valueSet()) s.add((int)x);
-				return new IntValue(s);
-			}
-			else if (source instanceof LongValue) {
-				LongValue v = (LongValue) source;
-				if (v.bottom()) return new IntValue();
-				Set<Integer> s = new HashSet<Integer>();
-				for (long x: v.valueSet()) s.add((int)x);
-				return new IntValue(s);
-			}
-			break;
-		case Long:
-			if (source instanceof LongValue) {
-				return source;
-			}
-			else if (source instanceof IntValue) {
-				IntValue v = (IntValue) source;
-				if (v.bottom()) return new LongValue();
-				Set<Long> s = new HashSet<Long>();
-				for (long x: v.valueSet()) s.add((long)x);
-				return new LongValue(s);
-			}
-			else if (source instanceof FloatValue) {
-				FloatValue v = (FloatValue) source;
-				if (v.bottom()) return new LongValue();
-				Set<Long> s = new HashSet<Long>();
-				for (float x: v.valueSet()) s.add((long)x);
-				return new LongValue(s);
-			}
-			else if (source instanceof DoubleValue) {
-				DoubleValue v = (DoubleValue) source;
-				if (v.bottom()) return new LongValue();
-				Set<Long> s = new HashSet<Long>();
-				for (double x: v.valueSet()) s.add((long)x);
-				return new LongValue(s);
-			}
-			break;
-		case Double:
-			if (source instanceof DoubleValue) {
-				return source;
-			}
-			else if (source instanceof IntValue) {
-				IntValue v = (IntValue) source;
-				if (v.bottom()) return new DoubleValue();
-				Set<Double> s = new HashSet<Double>();
-				for (int x: v.valueSet()) s.add((double)x);
-				return new DoubleValue(s);
-			}
-			else if (source instanceof LongValue) {
-				LongValue v = (LongValue) source;
-				if (v.bottom()) return new DoubleValue();
-				Set<Double> s = new HashSet<Double>();
-				for (long x: v.valueSet()) s.add((double)x);
-				return new DoubleValue(s);
-			}
-			else if (source instanceof FloatValue) {
-				FloatValue v = (FloatValue) source;
-				if (v.bottom()) return new DoubleValue();
-				Set<Double> s = new HashSet<Double>();
-				for (float x: v.valueSet()) s.add((double)x);
-				return new DoubleValue(s);
-			}
-			break;
-		case Float:
-			if (source instanceof FloatValue) {
-				return source;
-			}
-			else if (source instanceof IntValue) {
-				IntValue v = (IntValue) source;
-				if (v.bottom()) return new FloatValue();
-				Set<Float> s = new HashSet<Float>();
-				for (int x: v.valueSet()) s.add((float)x);
-				return new FloatValue(s);
-			}
-			else if (source instanceof LongValue) {
-				LongValue v = (LongValue) source;
-				if (v.bottom()) return new FloatValue();
-				Set<Float> s = new HashSet<Float>();
-				for (long x: v.valueSet()) s.add((float)x);
-				return new FloatValue(s);
-			}
-			else if (source instanceof DoubleValue) {
-				DoubleValue v = (DoubleValue) source;
-				if (v.bottom()) return new FloatValue();
-				Set<Float> s = new HashSet<Float>();
-				for (double x: v.valueSet()) s.add((float)x);
-				return new FloatValue(s);
-			}
-			break;
-		case Short:
-		case Byte:
-		case Boolean:
-		case Char:
-		default:
 		}
 		return BottomValue.v();
 	}

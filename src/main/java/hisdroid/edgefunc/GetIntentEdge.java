@@ -9,8 +9,8 @@ import heros.EdgeFunction;
 import hisdroid.Utility;
 import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.IntValue;
 import hisdroid.value.IntentValue;
+import hisdroid.value.PrimitiveDataValue;
 
 public class GetIntentEdge extends EdgeFunctionTemplate {
 	JSONObject iccLogs;
@@ -31,15 +31,18 @@ public class GetIntentEdge extends EdgeFunctionTemplate {
 	
 	@Override
 	protected GeneralValue computeTargetImplementation(GeneralValue source){
-		if (source instanceof IntValue) {
-			IntValue intSetSource = (IntValue) source;
-			if (!intSetSource.bottom()) {
-				Set<JSONObject> intentSet = new HashSet<JSONObject>();
-				for (Integer i: intSetSource.valueSet()) {
-					JSONObject jo = Utility.iccToIntent(iccLogs.getJSONObject(String.valueOf(i)));
-					if (jo != null) intentSet.add(jo);
+		if (source instanceof PrimitiveDataValue) {
+			if (Integer.class.equals(((PrimitiveDataValue<?>)source).type())){
+				@SuppressWarnings("unchecked")
+				PrimitiveDataValue<Integer> intSetSource = (PrimitiveDataValue<Integer>) source;
+				if (!intSetSource.bottom()) {
+					Set<JSONObject> intentSet = new HashSet<JSONObject>();
+					for (Integer i: intSetSource.valueSet()) {
+						JSONObject jo = Utility.iccToIntent(iccLogs.getJSONObject(String.valueOf(i)));
+						if (jo != null) intentSet.add(jo);
+					}
+					return new IntentValue(intentSet);
 				}
-				return new IntentValue(intentSet);
 			}
 		}
 		return new IntentValue();

@@ -4,7 +4,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class StringValue extends GeneralValue{
+import hisdroid.TriLogic;
+import hisdroid.value.interfaces.EqualableGeneralValue;
+
+public class StringValue extends GeneralValue implements EqualableGeneralValue {
 	Set<String> valueSet;
 	boolean bottom;
 	
@@ -35,7 +38,7 @@ public class StringValue extends GeneralValue{
 		return BottomValue.v();
 	}
 	
-	public Set<String> value() { return valueSet; }
+	public Set<String> valueSet() { return valueSet; }
 	public boolean bottom() { return bottom; }
 	
 	@Override
@@ -51,5 +54,19 @@ public class StringValue extends GeneralValue{
 	public String toString(){
 		if (bottom) return "Unknown String";
 		return valueSet.toString();
+	}
+
+	@Override
+	public TriLogic eqTo(EqualableGeneralValue rhs) {
+		if (rhs instanceof StringValue) {
+			StringValue srhs = (StringValue) rhs;
+			if (valueSet.size() == 1 && srhs.valueSet().size() == 1){
+				return TriLogic.toTriLogic(valueSet.iterator().next().equals(srhs.valueSet().iterator().next()));
+			}
+			Set<String> intersection = new HashSet<String>(valueSet);
+			intersection.retainAll(srhs.valueSet());
+			if (intersection.isEmpty()) return TriLogic.False;
+		}
+		return TriLogic.Unknown;
 	}
 }

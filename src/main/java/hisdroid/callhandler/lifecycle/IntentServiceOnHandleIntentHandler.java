@@ -11,6 +11,7 @@ import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.KillAll;
 import hisdroid.callhandler.CallHandler;
 import hisdroid.edgefunc.GetIntentEdge;
+import hisdroid.flowfunc.KillAllExceptStaticField;
 import hisdroid.value.GeneralValue;
 import soot.Scene;
 import soot.SootMethod;
@@ -56,6 +57,11 @@ public class IntentServiceOnHandleIntentHandler extends CallHandler {
 			return new GetIntentEdge(hisdroid.Config.getIccLogs());
 		}
 		return EdgeIdentity.v();
+	}
+
+	@Override
+	public FlowFunction<Value> getReturnFlowFunction(Unit callSite, SootMethod calleeMethod, Unit exitStmt, Unit returnSite, Value zeroValue){
+		return KillAllExceptStaticField.v();
 	}
 	
 	@Override

@@ -108,12 +108,9 @@ public class DummyMainCreator {
 					binderToClass.put(binder, targetClass);
 					tmpLocal = classToLocal.get(targetClass);
 					if (tmpLocal == null) {
-						tmpLocal = Jimple.v().newLocal(targetClass.replace(".","_"), RefType.v(targetClass));
-						body.getLocals().add(tmpLocal);
+						tmpLocal = createLocal(targetClass);
 						classToLocal.put(targetClass, tmpLocal);
-						Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
-						Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
-						units.addLast(assignStmt);
+						initClass(targetClass, tmpLocal);
 					}
 					addMethodCall(tmpLocal, targetClass, "onCreate", NullConstant.v());
 					addMethodCall(tmpLocal, targetClass, "onStart");
@@ -167,12 +164,9 @@ public class DummyMainCreator {
 					binderToClass.put(binder, targetClass);
 					tmpLocal = classToLocal.get(targetClass);
 					if (tmpLocal == null) {
-						tmpLocal = Jimple.v().newLocal(targetClass.replace(".","_"), RefType.v(targetClass));
-						body.getLocals().add(tmpLocal);
+						tmpLocal = createLocal(targetClass);
 						classToLocal.put(targetClass, tmpLocal);
-						Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
-						Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
-						units.addLast(assignStmt);
+						initClass(targetClass, tmpLocal);
 					}
 					addMethodCall(tmpLocal, targetClass, "onCreate");
 					break;
@@ -219,16 +213,9 @@ public class DummyMainCreator {
 					targetClass = iccLog.getJSONObject("intent").getJSONObject("mComponent").getString("mClass");
 					tmpLocal = classToLocal.get(targetClass);
 					if (tmpLocal == null) {
-						tmpLocal = Jimple.v().newLocal(targetClass.replace(".","_"), RefType.v(targetClass));
-						body.getLocals().add(tmpLocal);
+						tmpLocal = createLocal(targetClass);
 						classToLocal.put(targetClass, tmpLocal);
-						Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
-						Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
-						Unit clinitStmt = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(Scene.v().getSootClass(targetClass).getMethod("void <clinit>()").makeRef()));
-						Unit initStmt = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmpLocal, Scene.v().getSootClass(targetClass).getMethod("void <init>()").makeRef()));
-						units.addLast(assignStmt);
-						units.addLast(clinitStmt);
-						units.addLast(initStmt);
+						initClass(targetClass, tmpLocal);
 					}
 					addMethodCall(tmpLocal, targetClass, "onReceive", NullConstant.v(), NullConstant.v());
 					break;
@@ -238,6 +225,22 @@ public class DummyMainCreator {
 		// add return
 		Unit returnStmt = Jimple.v().newReturnVoidStmt();
 		units.addLast(returnStmt);
+	}
+	
+	Local createLocal(String targetClass){
+		Local tmpLocal = Jimple.v().newLocal(targetClass.replace(".","_"), RefType.v(targetClass));
+		body.getLocals().add(tmpLocal);
+		return tmpLocal;
+	}
+	
+	void initClass(String targetClass, Local tmpLocal){
+		Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
+		Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
+		Unit clinitStmt = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(Scene.v().getSootClass(targetClass).getMethod("void <clinit>()").makeRef()));
+		Unit initStmt = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmpLocal, Scene.v().getSootClass(targetClass).getMethod("void <init>()").makeRef()));
+		units.addLast(assignStmt);
+		units.addLast(clinitStmt);
+		units.addLast(initStmt);
 	}
 	
 	boolean isIntentService(String targetClass) {

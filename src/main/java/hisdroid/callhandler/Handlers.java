@@ -18,6 +18,7 @@ public class Handlers {
 	
 	static {
 		insertHandler(new StringInitHandler());
+		insertHandler(new StringEqualsHandler());
 		insertHandler(new GetIntentHandler());
 
 		// Life Cycle
@@ -32,7 +33,6 @@ public class Handlers {
 		insertHandler(new IntentGetBooleanHandler());
 		insertHandler(new IntentGetBundleHandler());
 		insertHandler(new IntentGetByteHandler());
-		insertHandler(new IntentGetCharHandler());
 		insertHandler(new IntentGetDoubleHandler());
 		insertHandler(new IntentGetExtrasHandler());
 		insertHandler(new IntentGetFloatHandler());
@@ -45,7 +45,6 @@ public class Handlers {
 		insertHandler(new BundleGetBooleanHandler());
 		insertHandler(new BundleGetBundleHandler());
 		insertHandler(new BundleGetByteHandler());
-		insertHandler(new BundleGetCharHandler());
 		insertHandler(new BundleGetDoubleHandler());
 		insertHandler(new BundleGetFloatHandler());
 		insertHandler(new BundleGetIntHandler());

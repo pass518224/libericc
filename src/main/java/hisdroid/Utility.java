@@ -1,5 +1,8 @@
 package hisdroid;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.json.JSONObject;
 
 public class Utility {
@@ -24,4 +27,24 @@ public class Utility {
 			return null;
 		}
 	}
+	
+	@SuppressWarnings("rawtypes")
+	static Map<Class, Integer> classToParcelTypeNumber = null;
+	@SuppressWarnings("rawtypes")
+	public static int getParcelTypeNumber(Class type) {
+		if (classToParcelTypeNumber == null) {
+			classToParcelTypeNumber = new HashMap<Class, Integer>();
+			
+			classToParcelTypeNumber.put(String.class, 0);
+			classToParcelTypeNumber.put(Integer.class, 1);
+			classToParcelTypeNumber.put(Short.class, 5);
+			classToParcelTypeNumber.put(Long.class, 6);
+			classToParcelTypeNumber.put(Float.class, 7);
+			classToParcelTypeNumber.put(Double.class, 8);
+			classToParcelTypeNumber.put(Boolean.class, 9);
+			classToParcelTypeNumber.put(Byte.class, 20);
+		}
+		return classToParcelTypeNumber.get(type);
+	}
+	
 }

@@ -12,8 +12,9 @@ import heros.flowfunc.KillAll;
 import hisdroid.callhandler.CallHandler;
 import hisdroid.edgefunc.ConstantEdge;
 import hisdroid.edgefunc.GetIntentEdge;
+import hisdroid.flowfunc.KillAllExceptStaticField;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.IntValue;
+import hisdroid.value.PrimitiveDataValue;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Unit;
@@ -69,13 +70,18 @@ public class ActivityOnActivityResultHandler extends CallHandler {
 			int ind = destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode);
 			if (ind == 0 || ind == 1) {
 				Value arg = ie.getArgs().get(ind);
-				new ConstantEdge(new IntValue(((IntConstant)arg).value));
+				new ConstantEdge(new PrimitiveDataValue<Integer>(Integer.class, ((IntConstant)arg).value));
 			}
 		}
 		else if (srcNode.equivTo(iccNo) && destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode)==2) {
 			return new GetIntentEdge(hisdroid.Config.getIccLogs());
 		}
 		return EdgeIdentity.v();
+	}
+	
+	@Override
+	public FlowFunction<Value> getReturnFlowFunction(Unit callSite, SootMethod calleeMethod, Unit exitStmt, Unit returnSite, Value zeroValue){
+		return KillAllExceptStaticField.v();
 	}
 	
 	@Override
@@ -87,6 +93,5 @@ public class ActivityOnActivityResultHandler extends CallHandler {
 	public EdgeFunction<GeneralValue> getCallToReturnEdgeFunction(Unit callSite, Value callNode, Unit returnSite,
 			Value returnSideNode, Value zeroValue) {
 		return EdgeIdentity.v();
-	}
-
+	}	
 }

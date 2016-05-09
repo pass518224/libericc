@@ -1,97 +1,38 @@
 package hisdroid.edgefunc.bundle;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import heros.EdgeFunction;
-import hisdroid.edgefunc.AllBottom;
 import hisdroid.edgefunc.EdgeFunctionTemplate;
-import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;
-import hisdroid.value.IntValue;
-import hisdroid.value.BundleValue;
 
-public class BundleGetIntEdge extends EdgeFunctionTemplate {
-	String name;
-	boolean knownDefault;
-	int defaultValue;
-	
+public class BundleGetIntEdge extends BundleGetPrimitiveEdge<Integer> {
+
 	public BundleGetIntEdge(){
-		this(null);
+		super(Integer.class);
 	}
 	
 	public BundleGetIntEdge(String name){
-		this.name = name;
-		knownDefault = false;
+		super(Integer.class, name);
 	}
 	
-	public BundleGetIntEdge(String name, int defaultValue){
-		this.name = name;
-		knownDefault = true;
-		this.defaultValue = defaultValue;
+	public BundleGetIntEdge(String name, Integer defaultValue){
+		super(Integer.class, name, defaultValue);
 	}
 
 	BundleGetIntEdge(BundleGetIntEdge old, EdgeFunction<GeneralValue> next){
-		this.name = old.name;
-		this.knownDefault = old.knownDefault;
-		this.defaultValue = old.defaultValue;
-		this.next = next;
+		super(old, next);
 	}
 	
 	public String name() { return name; }
 	public boolean knownDefault() { return knownDefault; }
-	public int defaultValue() { return defaultValue; }
+	public Integer defaultValue() { return defaultValue; }
+	
+	Integer stringToT(String s){
+		return Integer.parseInt(s);
+	}
 	
 	@Override
 	public EdgeFunctionTemplate copy() {
 		return new BundleGetIntEdge(this, next);
-	}
-
-	@Override
-	protected GeneralValue computeTargetImplementation(GeneralValue source) {
-		if (source instanceof BundleValue && name != null) {
-			BundleValue bundleSource = (BundleValue) source;
-			if (bundleSource.bottom()) return new IntValue();
-			Set<Integer> intSet = new HashSet<Integer>();
-			for (JSONObject b: bundleSource.bundles()) {
-				boolean added = false;
-				try {
-					JSONObject v = b.getJSONObject("map").getJSONObject(name);
-					if (v.getString("type").equals("1")) {
-						intSet.add(Integer.valueOf(v.getString("_")));
-						added = true;
-					}
-				} catch (JSONException e) {}
-				if (!added){
-					if (knownDefault) intSet.add(defaultValue);
-					else return new IntValue();
-				}
-			}
-			return new IntValue(intSet);
-		}
-		return new IntValue();
-	}
-
-	@Override
-	public EdgeFunction<GeneralValue> joinWithFirstEdge(EdgeFunction<GeneralValue> otherFunction) {
-		if (otherFunction instanceof BundleGetIntEdge) {
-			BundleGetIntEdge otherIntEdge = (BundleGetIntEdge) otherFunction;
-			if (equals(otherIntEdge)) return this;
-			return new BundleGetIntEdge();
-		}
-		return new AllBottom<GeneralValue>(BottomValue.v());
-	}
-
-	@Override
-	protected boolean equalToFirstEdge(EdgeFunction<GeneralValue> other) {
-		if (other instanceof BundleGetIntEdge) {
-			BundleGetIntEdge otherIntEdge = (BundleGetIntEdge) other;
-			return name.equals(otherIntEdge.name) && knownDefault == otherIntEdge.knownDefault && defaultValue == otherIntEdge.defaultValue;
-		}
-		return false;
 	}
 
 	@Override
@@ -101,5 +42,4 @@ public class BundleGetIntEdge extends EdgeFunctionTemplate {
 		}
 		return String.format("BundleGetIntEdge(\"%s\")",name);
 	}
-
 }

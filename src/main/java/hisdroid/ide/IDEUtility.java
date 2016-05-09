@@ -20,16 +20,16 @@ public class IDEUtility {
 	
 	public EdgeFunction<GeneralValue> getEdgeFromConstant(Constant c){
 		if (c instanceof IntConstant) {
-			return new ConstantEdge(new IntValue(((IntConstant)c).value));
+			return new ConstantEdge(new PrimitiveDataValue<Integer>(Integer.class, ((IntConstant)c).value));
 		}
 		if (c instanceof LongConstant) {
-			return new ConstantEdge(new LongValue(((LongConstant)c).value));
+			return new ConstantEdge(new PrimitiveDataValue<Long>(Long.class, ((LongConstant)c).value));
 		}
 		if (c instanceof FloatConstant) {
-			return new ConstantEdge(new FloatValue(((FloatConstant)c).value));
+			return new ConstantEdge(new PrimitiveDataValue<Float>(Float.class, ((FloatConstant)c).value));
 		}
 		if (c instanceof DoubleConstant) {
-			return new ConstantEdge(new DoubleValue(((DoubleConstant)c).value));
+			return new ConstantEdge(new PrimitiveDataValue<Double>(Double.class, ((DoubleConstant)c).value));
 		}
 		if (c instanceof StringConstant) {
 			return new ConstantEdge(new StringValue(((StringConstant)c).value));
