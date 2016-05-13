@@ -43,6 +43,7 @@ public abstract class IntentGetDataEdge<T> extends EdgeFunctionTemplate {
 
 	protected IntentGetDataEdge(IntentGetDataEdge<T> old, EdgeFunction<GeneralValue> next){
 		this.type = old.type;
+		this.knownName = old.knownName;
 		this.name = old.name;
 		this.knownDefault = old.knownDefault;
 		this.defaultValue = old.defaultValue;
@@ -62,7 +63,7 @@ public abstract class IntentGetDataEdge<T> extends EdgeFunctionTemplate {
 	
 	@Override
 	protected GeneralValue computeTargetImplementation(GeneralValue source) {
-		if (source instanceof IntentValue && name != null) {
+		if (source instanceof IntentValue && knownName) {
 			IntentValue intentSource = (IntentValue) source;
 			if (intentSource.bottom()) return unknownGeneralValue();
 			Set<T> valueSet = new HashSet<T>();
