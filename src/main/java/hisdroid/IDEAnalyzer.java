@@ -43,7 +43,7 @@ import soot.jimple.toolkits.ide.DefaultJimpleIDETabulationProblem;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
 
 public class IDEAnalyzer implements Analyzer{
-	static final Logger logger = Logger.getLogger("IDELog");
+	static final Logger logger = Logger.getLogger("HisDroid");
 	
 	DefaultJimpleIDETabulationProblem<Value, GeneralValue, InterproceduralCFG<Unit,SootMethod>> problem;
 	IDESolver<Unit, Value, SootMethod, GeneralValue, InterproceduralCFG<Unit, SootMethod>> solver;

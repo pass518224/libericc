@@ -57,7 +57,7 @@ import soot.jimple.internal.JimpleLocal;
 import soot.jimple.toolkits.ide.DefaultJimpleIDETabulationProblem;
 
 public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, GeneralValue, InterproceduralCFG<Unit,SootMethod>> {
-	static final Logger logger = Logger.getLogger("IDELog");
+	static final Logger logger = Logger.getLogger("HisDroid");
 	static PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
 	
 	SootMethod mainMethod = null;

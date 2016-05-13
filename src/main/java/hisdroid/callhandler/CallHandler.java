@@ -13,7 +13,7 @@ import soot.Unit;
 import soot.Value;
 
 abstract public class CallHandler {
-	static final Logger logger = Logger.getLogger("IDELog");
+	static final Logger logger = Logger.getLogger("HisDroid");
 	
 	public class MethodSig {
 		public String className;

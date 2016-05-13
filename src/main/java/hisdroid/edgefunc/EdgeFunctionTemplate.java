@@ -12,7 +12,7 @@ import hisdroid.value.GeneralValue;
  *
  */
 public abstract class EdgeFunctionTemplate implements EdgeFunction<GeneralValue> {
-	static Logger logger = Logger.getLogger("IDELog");
+	static protected Logger logger = Logger.getLogger("HisDroid");
 	/**
 	 * link two edge rather than compose them
 	 */

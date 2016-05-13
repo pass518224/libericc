@@ -39,7 +39,7 @@ import soot.jimple.NullConstant;
 import soot.options.Options;
 
 public class DummyMainCreator {
-	static final Logger logger = Logger.getLogger("IDELog");
+	static final Logger logger = Logger.getLogger("HisDroid");
 
 	SootClass dummyMainClass;
 	SootField iccNo;

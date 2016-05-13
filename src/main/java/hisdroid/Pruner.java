@@ -17,7 +17,7 @@ import soot.jimple.Jimple;
 import soot.util.queue.QueueReader;
 
 public class Pruner {
-	static final Logger logger = Logger.getLogger("IDELog");
+	static final Logger logger = Logger.getLogger("HisDroid");
 	Analyzer analyzer;
 	
 	public Pruner(Analyzer analyzer){
