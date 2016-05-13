@@ -57,6 +57,9 @@ public class IDEAnalyzer implements Analyzer{
 		solver = new IDESolver<Unit, Value, SootMethod, GeneralValue, InterproceduralCFG<Unit, SootMethod>>(problem);
 		solver.solve();
 		logger.info("IDE analysis ends");
+		for (String m: ((IDEProblem)problem).methods) {
+			logger.fine(m);
+		}
 	}
 	
 	@Override
@@ -99,8 +102,13 @@ public class IDEAnalyzer implements Analyzer{
 			if (map.containsKey(op2)) gv2 = map.get(op2);
 			
 			// Test null
-			if ((op1 instanceof NullConstant || gv1 instanceof NullValue) && (op2 instanceof NullConstant || gv2 instanceof NullValue)) {
-				return TriLogic.True;
+			if (condition instanceof EqExpr) {
+				if (op1 instanceof NullConstant) return isNullValue(gv2);
+				else if (op2 instanceof NullConstant) return isNullValue(gv1);
+			}
+			if (condition instanceof NeExpr) {
+				if (op1 instanceof NullConstant) return isNullValue(gv2).not();
+				else if (op2 instanceof NullConstant) return isNullValue(gv1).not();
 			}
 			// if op is a constant
 			if (op1 instanceof Constant) {
@@ -166,17 +174,23 @@ public class IDEAnalyzer implements Analyzer{
 						if (Collections.max(iv1.valueSet()) <= Collections.min(iv2.valueSet())) return TriLogic.False;
 					}
 					else if (condition instanceof LeExpr) {
-						if (Collections.min(iv1.valueSet()) <= Collections.max(iv2.valueSet())) return TriLogic.True;
-						if (Collections.max(iv1.valueSet()) > Collections.min(iv2.valueSet())) return TriLogic.False;
+						if (Collections.max(iv1.valueSet()) <= Collections.min(iv2.valueSet())) return TriLogic.True;
+						if (Collections.min(iv1.valueSet()) > Collections.max(iv2.valueSet())) return TriLogic.False;
 					}
 					else if (condition instanceof LtExpr) {
-						if (Collections.min(iv1.valueSet()) < Collections.max(iv2.valueSet())) return TriLogic.True;
-						if (Collections.max(iv1.valueSet()) >= Collections.min(iv2.valueSet())) return TriLogic.False;
+						if (Collections.max(iv1.valueSet()) < Collections.min(iv2.valueSet())) return TriLogic.True;
+						if (Collections.min(iv1.valueSet()) >= Collections.max(iv2.valueSet())) return TriLogic.False;
 					}
 				}
 			}
 		}
 		return TriLogic.Unknown;
+	}
+	
+	TriLogic isNullValue(GeneralValue v){
+		if (v instanceof NullValue) return TriLogic.True;
+		else if (v instanceof BottomValue || v == null) return TriLogic.Unknown;
+		else return TriLogic.False;
 	}
 	
 	PrimitiveDataValue<Integer> cmpValueToIntValue(CmpValue cv) {
