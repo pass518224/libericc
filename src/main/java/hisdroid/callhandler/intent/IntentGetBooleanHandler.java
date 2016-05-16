@@ -71,7 +71,7 @@ public class IntentGetBooleanHandler extends CallHandler {
 			if (arg0 instanceof StringConstant) {
 				if (arg1 instanceof IntConstant) {
 					if (callNode.equivTo(base) && returnSideNode.equivTo(lvalue)) {
-						return new IntentGetBooleanEdge(((StringConstant) arg0).value, ((IntConstant) arg1).value!=0);
+						return new IntentGetBooleanEdge(((StringConstant) arg0).value, ((IntConstant) arg1).value);
 					}
 				}
 				else {

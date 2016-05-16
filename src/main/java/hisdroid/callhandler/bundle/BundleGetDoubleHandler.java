@@ -9,7 +9,7 @@ import heros.FlowFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import hisdroid.callhandler.CallHandler;
-import hisdroid.edgefunc.intent.IntentGetDoubleEdge;
+import hisdroid.edgefunc.bundle.BundleGetDoubleEdge;
 import hisdroid.value.GeneralValue;
 import soot.Unit;
 import soot.Value;
@@ -73,10 +73,10 @@ public class BundleGetDoubleHandler extends CallHandler {
 				if (argc == 2) {
 					final Value arg1 = iie.getArg(1);
 					if (arg1 instanceof DoubleConstant) {
-						return new IntentGetDoubleEdge(((StringConstant) arg0).value, ((DoubleConstant) arg1).value);
+						return new BundleGetDoubleEdge(((StringConstant) arg0).value, ((DoubleConstant) arg1).value);
 					}
 				}
-				return new IntentGetDoubleEdge(((StringConstant) arg0).value);
+				return new BundleGetDoubleEdge(((StringConstant) arg0).value);
 			}
 		}
 		return EdgeIdentity.v();

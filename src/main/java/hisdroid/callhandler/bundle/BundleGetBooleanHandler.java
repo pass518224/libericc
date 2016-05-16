@@ -9,7 +9,7 @@ import heros.FlowFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import hisdroid.callhandler.CallHandler;
-import hisdroid.edgefunc.intent.IntentGetBooleanEdge;
+import hisdroid.edgefunc.bundle.BundleGetBooleanEdge;
 import hisdroid.value.GeneralValue;
 import soot.Unit;
 import soot.Value;
@@ -73,10 +73,10 @@ public class BundleGetBooleanHandler extends CallHandler {
 				if (argc == 2) {
 					final Value arg1 = iie.getArg(1);
 					if (arg1 instanceof IntConstant) {
-						return new IntentGetBooleanEdge(((StringConstant) arg0).value, ((IntConstant) arg1).value != 0);
+						return new BundleGetBooleanEdge(((StringConstant) arg0).value, ((IntConstant) arg1).value);
 					}
 				}
-				return new IntentGetBooleanEdge(((StringConstant) arg0).value);
+				return new BundleGetBooleanEdge(((StringConstant) arg0).value);
 			}
 		}
 		return EdgeIdentity.v();

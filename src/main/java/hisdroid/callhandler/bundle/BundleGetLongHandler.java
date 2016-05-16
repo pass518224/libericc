@@ -9,7 +9,7 @@ import heros.FlowFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import hisdroid.callhandler.CallHandler;
-import hisdroid.edgefunc.intent.IntentGetLongEdge;
+import hisdroid.edgefunc.bundle.BundleGetLongEdge;
 import hisdroid.value.GeneralValue;
 import soot.Unit;
 import soot.Value;
@@ -73,10 +73,10 @@ public class BundleGetLongHandler extends CallHandler {
 				if (argc == 2) {
 					final Value arg1 = iie.getArg(1);
 					if (arg1 instanceof LongConstant) {
-						return new IntentGetLongEdge(((StringConstant) arg0).value, ((LongConstant) arg1).value);
+						return new BundleGetLongEdge(((StringConstant) arg0).value, ((LongConstant) arg1).value);
 					}
 				}
-				return new IntentGetLongEdge(((StringConstant) arg0).value);
+				return new BundleGetLongEdge(((StringConstant) arg0).value);
 			}
 		}
 		return EdgeIdentity.v();
