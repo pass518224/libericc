@@ -15,6 +15,7 @@ import soot.SootMethod;
 public class Handlers {
 	// methodSubSignature -> (superClass -> Handler)
 	static Map<String, Map<SootClass, CallHandler>> m = new HashMap<String, Map<SootClass, CallHandler>>();
+	static CallHandler ignoredCallHandler = new IgnoredCallHandler();
 	
 	static {
 		insertHandler(new StringInitHandler());
@@ -55,16 +56,18 @@ public class Handlers {
 	
 	static public CallHandler getHandler(SootMethod method){
 		Map<SootClass, CallHandler> m2 = m.get(method.getSubSignature());
-		if (m2 == null) {
-			return null;
-		}
-		
-		for (SootClass c = method.getDeclaringClass(); c != null; c = c.getSuperclass()) {
-			CallHandler ch = m2.get(c);
-			if (ch != null) {
-				return ch;
+		if (m2 != null) {
+			try {
+				for (SootClass c = method.getDeclaringClass(); c != null; c = c.getSuperclass()) {
+					CallHandler ch = m2.get(c);
+					if (ch != null) {
+						return ch;
+					}
+				}
 			}
+			catch (Exception e) {}
 		}
+		if (isIgnoredMethod(method)) return ignoredCallHandler;
 		return null;
 	}
 	
@@ -80,5 +83,15 @@ public class Handlers {
 			}
 			m2.put(declaringClass, handler);
 		}
+	}
+	
+	static public boolean isIgnoredMethod(SootMethod m) {
+		String packageName = m.getDeclaringClass().getJavaPackageName();
+		return m.isJavaLibraryMethod()
+				|| m.isPhantom()
+				|| packageName.startsWith("android")
+				|| packageName.startsWith("com.google")
+				|| packageName.startsWith("com.android")
+				|| packageName.startsWith("dalvik.system");
 	}
 }
