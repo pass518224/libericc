@@ -4,18 +4,18 @@ import heros.EdgeFunction;
 import hisdroid.edgefunc.EdgeFunctionTemplate;
 import hisdroid.value.GeneralValue;
 
-public class IntentGetBooleanEdge extends IntentGetPrimitiveEdge<Boolean> {
+public class IntentGetBooleanEdge extends IntentGetPrimitiveEdge<Integer> {
 	
 	public IntentGetBooleanEdge(){
-		super(Boolean.class);
+		super(Integer.class);
 	}
 	
 	public IntentGetBooleanEdge(String name){
-		super(Boolean.class, name);
+		super(Integer.class, name);
 	}
 	
-	public IntentGetBooleanEdge(String name, Boolean defaultValue){
-		super(Boolean.class, name, defaultValue);
+	public IntentGetBooleanEdge(String name, Integer defaultValue){
+		super(Integer.class, name, defaultValue);
 	}
 
 	IntentGetBooleanEdge(IntentGetBooleanEdge old, EdgeFunction<GeneralValue> next){
@@ -23,8 +23,8 @@ public class IntentGetBooleanEdge extends IntentGetPrimitiveEdge<Boolean> {
 	}
 
 	@Override
-	Boolean stringToT(String s) {
-		return Boolean.parseBoolean(s);
+	Integer stringToT(String s) {
+		return Integer.parseInt(s);
 	}
 	
 	@Override

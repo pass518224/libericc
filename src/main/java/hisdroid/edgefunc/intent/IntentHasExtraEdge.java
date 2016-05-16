@@ -44,7 +44,7 @@ public class IntentHasExtraEdge extends EdgeFunctionTemplate {
 	protected GeneralValue computeTargetImplementation(GeneralValue source) {
 		if (source instanceof IntentValue && name != null) {
 			IntentValue intentSource = (IntentValue) source;
-			if (intentSource.bottom()) return new PrimitiveDataValue<Boolean>(Boolean.class);
+			if (intentSource.bottom()) return new PrimitiveDataValue<Integer>(Integer.class);
 			
 			boolean t = false, f = false;  
 			for (JSONObject i: intentSource.intents()) {
@@ -52,12 +52,12 @@ public class IntentHasExtraEdge extends EdgeFunctionTemplate {
 					if (i.getJSONObject("mExtras").getJSONObject("map").has(name)) t = true;
 					else f = true;
 				} catch (JSONException e) {
-					return new PrimitiveDataValue<Boolean>(Boolean.class);
+					return new PrimitiveDataValue<Integer>(Integer.class);
 				}
 			}
-			if (t != f) return new PrimitiveDataValue<Boolean>(Boolean.class, t);
+			if (t != f) return new PrimitiveDataValue<Integer>(Integer.class, t? 1: 0);
 		}
-		return new PrimitiveDataValue<Boolean>(Boolean.class);
+		return new PrimitiveDataValue<Integer>(Integer.class);
 	}
 
 	@Override
@@ -73,8 +73,8 @@ public class IntentHasExtraEdge extends EdgeFunctionTemplate {
 	@Override
 	protected boolean equalToFirstEdge(EdgeFunction<GeneralValue> other) {
 		if (other instanceof IntentHasExtraEdge) {
-			IntentHasExtraEdge otherBooleanEdge = (IntentHasExtraEdge) other;
-			return name.equals(otherBooleanEdge.name);
+			IntentHasExtraEdge otherEdge = (IntentHasExtraEdge) other;
+			return name.equals(otherEdge.name);
 		}
 		return false;
 	}
