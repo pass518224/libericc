@@ -8,7 +8,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class Config {
-	static JSONObject iccLogs;
+	public enum OutputFormat { none, jimple, apk; }
+
+	static JSONObject iccLogs;	
+	public static boolean prune = true;
+	public static OutputFormat outputFormat = OutputFormat.apk;
+	public static String icclogPath;
+	public static String apkPath;
+	public static String androidjars;
 	
 	static public void loadIccLogs(String filename){
 		String content = null;
