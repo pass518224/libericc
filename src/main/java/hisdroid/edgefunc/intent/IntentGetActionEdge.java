@@ -17,7 +17,7 @@ import hisdroid.value.StringValue;
 public class IntentGetActionEdge extends EdgeFunctionTemplate {
 	@Override
 	public EdgeFunctionTemplate copy() {
-		return this;
+		return new IntentGetActionEdge();
 	}
 
 	@Override

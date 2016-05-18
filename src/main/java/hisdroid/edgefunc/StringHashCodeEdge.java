@@ -11,11 +11,9 @@ import hisdroid.value.StringValue;
 
 public class StringHashCodeEdge extends EdgeFunctionTemplate {
 	
-	public StringHashCodeEdge() {}
-	
 	@Override
 	public EdgeFunctionTemplate copy(){
-		return this;
+		return new StringHashCodeEdge();
 	}
 	
 	@Override
