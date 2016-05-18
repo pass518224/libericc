@@ -44,9 +44,7 @@ public class StringEqualsHandler extends CallHandler {
 			final Value arg0 = iie.getArg(0);
 	
 			if (callNode == zeroValue && returnSideNode.equivTo(leftOp)) {
-				EqualityValue ev = new EqualityValue(stmt, base, arg0);
-				logger.finest(String.format("(C2R) %s: %s -> %s [ConstantEdge(%s)]", callSite, callNode, returnSideNode, ev));
-				return new ConstantEdge(ev);
+				return new ConstantEdge(new EqualityValue(stmt, base, arg0));
 			}
 		}
 		return EdgeIdentity.v();

@@ -67,15 +67,7 @@ public class StringInitHandler extends CallHandler {
 
 		if (arg0 instanceof StringConstant) {
 			if (callNode == zeroValue && returnSideNode.equivTo(base)) {
-				String s = ((StringConstant) arg0).value;
-				logger.finest(String.format("(C2R) %s: %s -> %s [ConstantEdge(%s)]", callSite, callNode, returnSideNode, s));
-				return new ConstantEdge(new StringValue(s));
-			}
-		}
-		else {
-			if (callNode.equivTo(arg0) && returnSideNode.equivTo(base)) {
-				logger.finest(String.format("(C2R) %s: %s -> %s [id]", callSite, callNode, returnSideNode));
-				return EdgeIdentity.v();
+				return new ConstantEdge(new StringValue(((StringConstant) arg0).value));
 			}
 		}
 		
