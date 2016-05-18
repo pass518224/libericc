@@ -56,18 +56,21 @@ public class CmdParser {
 				Config.prune = false;
 				logger.config("prune = false");
 			}
-			switch (line.getOptionValue("f", "apk")) {
-			case "none":
-				Config.outputFormat = Config.OutputFormat.none;
-				break;
-			case "apk":
-				Config.outputFormat = Config.OutputFormat.apk;
-				break;
-			case "jimple":
-				Config.outputFormat = Config.OutputFormat.jimple;
-				break;
-			default:
-				throw new ParseException("Unknown argument in -f");
+			if (line.hasOption("f")) {
+				switch (line.getOptionValue("f")) {
+				case "none":
+					Config.outputFormat = Config.OutputFormat.none;
+					break;
+				case "apk":
+					Config.outputFormat = Config.OutputFormat.apk;
+					break;
+				case "jimple":
+					Config.outputFormat = Config.OutputFormat.jimple;
+					break;
+				default:
+					throw new ParseException("Unknown argument in -f");
+				}
+				logger.config("outputFormat = "+line.getOptionValue("f"));
 			}
 		}
 		catch (ParseException e) {

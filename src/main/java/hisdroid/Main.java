@@ -44,6 +44,7 @@ public class Main {
 		Scene.v().loadNecessaryClasses();
 		soot.Main.v().autoSetOptions();
 		PackManager.v().runPacks();
+		PackManager.v().writeOutput();
 		
 		Date finish = new Date();
 		long t = finish.getTime() - start.getTime();
@@ -58,8 +59,10 @@ public class Main {
 		switch (Config.outputFormat) {
 		case none:
 			Options.v().set_output_format(Options.output_format_none); // -f n
+			break;
 		case jimple:
 			Options.v().set_output_format(Options.output_format_jimple); // -f J
+			break;
 		case apk:
 		default:
 			Options.v().set_output_format(Options.output_format_dex); // -f dex
