@@ -56,6 +56,7 @@ public class Main {
 		Options.v().set_allow_phantom_refs(true); // -allow-phantom-refs
 		Options.v().set_ignore_resolution_errors(true); // -ire
 		Options.v().set_src_prec(Options.src_prec_apk); // -src-prec apk
+		Options.v().set_force_overwrite(true);
 		switch (Config.outputFormat) {
 		case none:
 			Options.v().set_output_format(Options.output_format_none); // -f n
