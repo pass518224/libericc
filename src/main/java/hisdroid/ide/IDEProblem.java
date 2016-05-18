@@ -262,7 +262,13 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			return new FlowFunction<Value>(){
 				@Override
 				public Set<Value> computeTargets(Value source){
+					if (source.equivTo(leftOp)) {
+						return Collections.emptySet();
+					}
+					
 					Set<Value> res = new HashSet<Value>();
+					res.add(source);
+					
 					if (source.equivTo(rightOp)) {
 						res.add(leftOp);
 					}
@@ -299,9 +305,6 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 						}
 					}
 					
-					if (!source.equivTo(leftOp)) {
-						res.add(source);
-					}
 					return res;
 				}
 			};
@@ -328,7 +331,6 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 		for(int i=0;i<destinationMethod.getParameterCount();i++) {
 			paramLocals.add(destinationMethod.getActiveBody().getParameterLocal(i));
 		}
-		//assert callArgs.size() == paramLocals.size() : callStmt + " " + destinationMethod;
 		
 		return new FlowFunction<Value>() {
 			@Override
@@ -406,7 +408,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 		if (ch != null) {
 			return ch.getCallToReturnFlowFunction(callSite, returnSite, zeroValue());
 		}
-		
+
 		if (icfg.getCalleesOfCallAt(callSite).isEmpty()) {
 			return new FlowFunction<Value>() {
 				@Override

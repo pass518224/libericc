@@ -51,17 +51,17 @@ public abstract class EdgeFunctionTemplate implements EdgeFunction<GeneralValue>
 			if (next == tmpnext) return this;
 		}
 		else tmpnext = secondFunction;
-		
-		EdgeFunctionTemplate tmp = this.copy();
-		if (tmpnext instanceof EdgeIdentity) {
-			tmp.next = null;
-			return tmp;
-		}
+
 		if (tmpnext instanceof AllBottom) {
 			return tmpnext;
 		}
 		if (tmpnext instanceof ConstantEdge) {
 			return tmpnext;
+		}
+		EdgeFunctionTemplate tmp = this.copy();
+		if (tmpnext instanceof EdgeIdentity) {
+			tmp.next = null;
+			return tmp;
 		}
 		tmp.next = tmpnext;
 		return tmp.composeWithNext();
