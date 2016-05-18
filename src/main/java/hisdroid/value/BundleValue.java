@@ -37,6 +37,6 @@ public class BundleValue extends DataValue<JSONObject> {
 	@Override
 	public String toString(){
 		if (bottom) return "Unknown Bundle";
-		else return "Bundle";
+		else return "Bundle: "+valueSet;
 	}
 }

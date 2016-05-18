@@ -37,7 +37,7 @@ public class IntentValue extends DataValue<JSONObject> {
 	@Override
 	public String toString(){
 		if (bottom) return "Unknown Intent";
-		else return "Intent";
+		else return "Intent: "+valueSet;
 	}
 	
 }
