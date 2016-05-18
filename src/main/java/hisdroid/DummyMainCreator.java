@@ -234,13 +234,22 @@ public class DummyMainCreator {
 	}
 	
 	void initClass(String targetClass, Local tmpLocal){
-		Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
-		Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
-		Unit clinitStmt = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(Scene.v().getSootClass(targetClass).getMethod("void <clinit>()").makeRef()));
-		Unit initStmt = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmpLocal, Scene.v().getSootClass(targetClass).getMethod("void <init>()").makeRef()));
-		units.addLast(assignStmt);
-		units.addLast(clinitStmt);
-		units.addLast(initStmt);
+		try {
+			Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
+			Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
+			units.addLast(assignStmt);
+		}
+		catch (Exception e) {}
+		try {
+			Unit clinitStmt = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(Scene.v().getSootClass(targetClass).getMethod("void <clinit>()").makeRef()));
+			units.addLast(clinitStmt);
+		}
+		catch (Exception e) {}
+		try {
+			Unit initStmt = Jimple.v().newInvokeStmt(Jimple.v().newSpecialInvokeExpr(tmpLocal, Scene.v().getSootClass(targetClass).getMethod("void <init>()").makeRef()));
+			units.addLast(initStmt);
+		}
+		catch (Exception e) {}
 	}
 	
 	boolean isIntentService(String targetClass) {
