@@ -20,6 +20,7 @@ public class Handlers {
 	static {
 		insertHandler(new StringInitHandler());
 		insertHandler(new StringEqualsHandler());
+		insertHandler(new StringHashCodeHandler());
 		insertHandler(new GetIntentHandler());
 
 		// Life Cycle
