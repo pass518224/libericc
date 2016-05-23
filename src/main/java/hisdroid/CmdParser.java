@@ -34,8 +34,9 @@ public class CmdParser {
 				.required()
 				.build());
 		options.addOption(
-				Option.builder().longOpt("not-prune")
-				.desc("Do not prune output code")
+				Option.builder("i").longOpt("instrument")
+				.hasArg().argName("type")
+				.desc("Instrument type [none, prune, stats] (Default: prune)")
 				.build());
 		options.addOption(
 				Option.builder("f").longOpt("output-format")
@@ -52,9 +53,21 @@ public class CmdParser {
 			logger.config(String.format("apkPath = %s", Config.apkPath));
 			Config.androidjars = line.getOptionValue("j");
 			logger.config(String.format("androidjars = %s", Config.androidjars));
-			if (line.hasOption("not-prune")) {
-				Config.prune = false;
-				logger.config("prune = false");
+			if (line.hasOption("i")) {
+				switch (line.getOptionValue("i")) {
+				case "none":
+					Config.instrument = Config.Instrument.none;
+					break;
+				case "prune":
+					Config.instrument = Config.Instrument.prune;
+					break;
+				case "stats":
+					Config.instrument = Config.Instrument.stats;
+					break;
+				default:
+					throw new ParseException("Unknown argument in -i");
+				}
+				logger.config("instrument = "+line.getOptionValue("i"));
 			}
 			if (line.hasOption("f")) {
 				switch (line.getOptionValue("f")) {

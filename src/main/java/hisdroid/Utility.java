@@ -46,5 +46,4 @@ public class Utility {
 		}
 		return classToParcelTypeNumber.get(type);
 	}
-	
 }

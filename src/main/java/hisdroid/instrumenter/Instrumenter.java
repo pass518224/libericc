@@ -1,16 +1,16 @@
-package hisdroid;
+package hisdroid.instrumenter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import hisdroid.Analyzer;
+import hisdroid.TriLogic;
 import hisdroid.value.BottomValue;
 import hisdroid.value.CmpValue;
 import hisdroid.value.DataValue;
@@ -38,7 +38,6 @@ import soot.jimple.GeExpr;
 import soot.jimple.GtExpr;
 import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
-import soot.jimple.Jimple;
 import soot.jimple.LeExpr;
 import soot.jimple.LongConstant;
 import soot.jimple.LookupSwitchStmt;
@@ -51,26 +50,27 @@ import soot.jimple.SwitchStmt;
 import soot.jimple.TableSwitchStmt;
 import soot.util.queue.QueueReader;
 
-public class Pruner {
-	static final Logger logger = Logger.getLogger("HisDroid");
+abstract public class Instrumenter {
+	static protected final Logger logger = Logger.getLogger("HisDroid");
 	Analyzer analyzer;
 	
-	public Pruner(Analyzer analyzer){
+	public Instrumenter(Analyzer analyzer){
 		this.analyzer = analyzer;
 	}
 	
-	public void prune(){
-		logger.info("Pruner starts");
+	public void instrument(){
+		logger.info("Start instrument");
 		for (QueueReader<MethodOrMethodContext> qr = Scene.v().getReachableMethods().listener();qr.hasNext(); ) {
 			SootMethod s = qr.next().method();
-			if (shouldBePruned(s)) {
-				prune(s);
+			if (shouldInstrument(s)) {
+				logger.fine("Instrument "+s.toString());
+				instrument(s);
 			}
 		}
-		logger.info("Pruner ends");
+		logger.info("End instrument");
 	}
 	
-	boolean shouldBePruned(SootMethod s) {
+	boolean shouldInstrument(SootMethod s) {
 		String packageName = s.getDeclaringClass().getJavaPackageName();
 		return !s.getDeclaringClass().isLibraryClass()
 				&& !s.isJavaLibraryMethod()
@@ -79,9 +79,8 @@ public class Pruner {
 				&& !packageName.startsWith("dalvik.system");
 	}
 	
-	void prune(SootMethod m) {
+	void instrument(SootMethod m) {
 		PatchingChain<Unit> unitChain = m.getActiveBody().getUnits();
-		logger.fine("Pruning "+m.toString());
 		
 		List<IfStmt> ifList = new ArrayList<IfStmt>();
 		List<SwitchStmt> switchList = new ArrayList<SwitchStmt>();
@@ -97,41 +96,28 @@ public class Pruner {
 		}
 
 		for (SwitchStmt ss: switchList) {
-			List<Unit> newUnits = pruneSwitch(ss);
-			if (!newUnits.isEmpty()) {
-				logger.fine(String.format("Change SwitchStmt %s to %s", ss, newUnits));
-				if (Config.prune) {
-					unitChain.insertBefore(newUnits, ss);
-					unitChain.remove(ss);
-				}
+			ResultOfSwitch result = resultAtSwitch(ss);
+			if (result.isBottom()) {
+				logger.fine(String.format("Unknown at Switch: %s", ss));
 			}
 			else {
-				logger.fine(String.format("Unknown at SwitchStmt %s", ss));
+				List<Unit> newUnits = instrumentSwitch(unitChain, ss, result);
+				logger.fine(String.format("Change Switch: %s to %s", ss, newUnits));
 			}
 		}
 		for (IfStmt is: ifList) {
-			TriLogic b = branchAt(is);
-			if (b.isTrue()) {
-				logger.fine("True at Branch: " + is);
-				if (Config.prune) {
-					Unit newGoto = Jimple.v().newGotoStmt(is.getTarget());
-					unitChain.insertBefore(newGoto, is);
-					unitChain.remove(is);
-				}
-			}
-			else if (b.isFalse()) {
-				logger.fine("False at Branch: " + is);
-				if (Config.prune) {
-					unitChain.remove(is);
-				}
-			}
-			else {
-				logger.fine("Unknown at Branch: " + is);
+			TriLogic result = resultAtBranch(is);
+			logger.fine(String.format("%s at branch: %s", result, is));
+			if (result != TriLogic.Unknown) {
+				instrumentBranch(unitChain, is, result);
 			}
 		}
 	}
 
-	public TriLogic branchAt(IfStmt stmt){
+	abstract void instrumentBranch(PatchingChain<Unit> unitChain, IfStmt stmt, TriLogic result);
+	abstract public List<Unit> instrumentSwitch(PatchingChain<Unit> unitChain, SwitchStmt stmt, ResultOfSwitch result);
+
+	public TriLogic resultAtBranch(IfStmt stmt){
 		Map<Value, GeneralValue> map = analyzer.resultsAt(stmt);
 		Value condition = stmt.getCondition();
 		
@@ -245,22 +231,40 @@ public class Pruner {
 		}
 		return TriLogic.Unknown;
 	}
+	
+	class ResultOfSwitch {
+		boolean bottom;
+		Map<Integer, Unit> reachableValueToTarget;
+		boolean defaultTargetIsReachable;
 
-	// return new statement to replace the stmt
-	// return empty list if need not to replace
-	public List<Unit> pruneSwitch(SwitchStmt stmt){
+		public ResultOfSwitch() {
+			bottom = true;
+		}
+		
+		public ResultOfSwitch(Map<Integer, Unit> reachableValueToTarget, boolean defaultTargetIsReachable) {
+			bottom = false;
+			this.reachableValueToTarget = reachableValueToTarget;
+			this.defaultTargetIsReachable = defaultTargetIsReachable;
+		}
+		
+		public boolean isBottom() { return bottom; }
+		public Map<Integer, Unit> getReachableValueToTarget() { return reachableValueToTarget; }
+		public boolean getDefaultTargetIsReachable() { return defaultTargetIsReachable; }
+	}
+	
+	ResultOfSwitch resultAtSwitch(SwitchStmt stmt){
 		Map<Value, GeneralValue> map = analyzer.resultsAt(stmt);
 		Value key = stmt.getKey();
 		
 		GeneralValue gv = map.get(key);
 		PrimitiveDataValue<Integer> iv = castGeneralValueToIntValue(gv);
-		
+
 		// return if iv is unknown
-		if (iv == null || iv.bottom()) return new ArrayList<Unit>();
-		
+		if (iv == null || iv.bottom()) return new ResultOfSwitch();
+
 		// reachable targets
 		Map<Integer, Unit> reachableValueToTarget = new HashMap<Integer, Unit>();
-		boolean defaultTargetReachable = false;
+		boolean defaultTargetIsReachable = false;
 		
 		if (stmt instanceof LookupSwitchStmt) {
 			LookupSwitchStmt s = (LookupSwitchStmt) stmt;
@@ -277,11 +281,11 @@ public class Pruner {
 						reachableValueToTarget.put(i, s.getTarget(lookupValueToIndex.get(i)));
 					}
 				}
-				else defaultTargetReachable = true;
+				else defaultTargetIsReachable = true;
 			}
 			// if all path are reachable
-			if (s.getTargetCount()==reachableValueToTarget.size() && defaultTargetReachable) {
-				return new ArrayList<Unit>();
+			if (s.getTargetCount()==reachableValueToTarget.size() && defaultTargetIsReachable) {
+				return new ResultOfSwitch();
 			}
 		}
 		else if (stmt instanceof TableSwitchStmt) {
@@ -295,68 +299,14 @@ public class Pruner {
 						reachableValueToTarget.put(i, s.getTarget(i-low));
 					}
 				}
-				else defaultTargetReachable = true;
+				else defaultTargetIsReachable = true;
 			}
 			// if all path are reachable
-			if (high-low+1==reachableValueToTarget.size() && defaultTargetReachable) {
-				return new ArrayList<Unit>();
+			if (high-low+1==reachableValueToTarget.size() && defaultTargetIsReachable) {
+				return new ResultOfSwitch();
 			}
 		}
-
-		int pathCount = reachableValueToTarget.size();
-		if (defaultTargetReachable) pathCount++;
-		
-		List<Unit> ret = new ArrayList<Unit>();
-		// return a gotoStmt if only 1 target is reachable
-		if (pathCount == 1) {
-			if (defaultTargetReachable) {
-				ret.add(Jimple.v().newGotoStmt(stmt.getDefaultTarget()));
-			}
-			else {
-				ret.add(Jimple.v().newGotoStmt(reachableValueToTarget.entrySet().iterator().next().getValue()));
-			}
-		}
-		// return a ifStmt if just 2 targets are reachable
-		else if (pathCount == 2) {
-			// if key == targetValue goto target; else goto default target
-			if (defaultTargetReachable) {
-				Entry<Integer, Unit> pair = reachableValueToTarget.entrySet().iterator().next();
-				int targetValue = pair.getKey();
-				Unit target = pair.getValue();
-				ret.add(Jimple.v().newIfStmt(Jimple.v().newEqExpr(key, IntConstant.v(targetValue)), target));
-				ret.add(Jimple.v().newGotoStmt(stmt.getDefaultTarget()));
-			}
-			// if key == targetValue1 goto target1; else goto target2
-			else {
-				Iterator<Entry<Integer, Unit>> it = reachableValueToTarget.entrySet().iterator();
-				Entry<Integer, Unit> pair = it.next();
-				int targetValue1 = pair.getKey();
-				Unit target1 = pair.getValue();
-				Unit target2 = it.next().getValue();
-				ret.add(Jimple.v().newIfStmt(Jimple.v().newEqExpr(key, IntConstant.v(targetValue1)), target1));
-				ret.add(Jimple.v().newGotoStmt(target2));
-			}
-		}
-		// return a new lookupSwitchStmt
-		else if (pathCount >= 3) {
-			List<IntConstant> lookupValues = new ArrayList<IntConstant>();
-			List<Unit> targets = new ArrayList<Unit>();
-			for (Entry<Integer, Unit> e: reachableValueToTarget.entrySet()) {
-				lookupValues.add(IntConstant.v(e.getKey()));
-				targets.add(e.getValue());
-			}
-			// use original default target
-			if (defaultTargetReachable) {
-				ret.add(Jimple.v().newLookupSwitchStmt(key, lookupValues, targets, stmt.getDefaultTarget()));
-			}
-			// choose the last target as default
-			else {
-				lookupValues.remove(lookupValues.size()-1);
-				Unit defaultTarget = targets.remove(targets.size()-1);
-				ret.add(Jimple.v().newLookupSwitchStmt(key, lookupValues, targets, defaultTarget));
-			}
-		}
-		return ret;
+		return new ResultOfSwitch(reachableValueToTarget, defaultTargetIsReachable);
 	}
 	
 	@SuppressWarnings("unchecked")

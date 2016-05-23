@@ -1,14 +1,14 @@
 package hisdroid;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.Map;
+import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import hisdroid.instrumenter.StatsInstrumenter;
 import soot.PackManager;
 import soot.Scene;
-import soot.SceneTransformer;
 import soot.Transform;
 import soot.options.Options;
 
@@ -16,31 +16,18 @@ public class Main {
 	static Logger logger = Logger.getLogger("HisDroid");
 
 	public static void main(String[] args) {
-		readLogProperties();
+		Date start = new Date();
+
 		boolean parseSuccess = CmdParser.parseArg(args);
 		if (!parseSuccess) return;
+		readLogProperties();
 		setOptions();
 		Config.loadIccLogs(Config.icclogPath);
+		if (Config.instrument==Config.Instrument.stats) {
+			StatsInstrumenter.storeStatsCounter();
+		}
 
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.IDEAnalysis", new SceneTransformer() {
-			protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
-
-				new DummyMainCreator().createDummyMain();
-				
-				soot.options.Options.v().setPhaseOption("cg.spark", "enabled:true");
-				soot.options.Options.v().setPhaseOption("cg.spark", "string-constants:true");
-				PackManager.v().getPack("cg").apply();
-				
-				Analyzer analyzer = new IDEAnalyzer();
-				analyzer.analyze(Scene.v().getMainMethod());
-				
-				Pruner pruner = new Pruner(analyzer);
-				pruner.prune();//*/
-			}
-		}));
-		
-		Date start = new Date();
-		
+		PackManager.v().getPack("wjtp").add(new Transform("wjtp.hisdroid", new HisdroidAnalysisTransformer()));
 		Scene.v().loadNecessaryClasses();
 		soot.Main.v().autoSetOptions();
 		PackManager.v().runPacks();
@@ -55,7 +42,7 @@ public class Main {
 		Options.v().set_whole_program(true); // -w
 		Options.v().set_allow_phantom_refs(true); // -allow-phantom-refs
 		Options.v().set_ignore_resolution_errors(true); // -ire
-		Options.v().set_src_prec(Options.src_prec_apk); // -src-prec apk
+		Options.v().set_src_prec(Options.src_prec_apk_class_jimple); // -src-prec apk-c-j
 		Options.v().set_force_overwrite(true);
 		switch (Config.outputFormat) {
 		case none:
@@ -70,7 +57,10 @@ public class Main {
 		}
 
 		Options.v().set_android_jars(Config.androidjars);
-		Options.v().set_process_dir(Collections.singletonList(Config.apkPath));
+		List<String> processDir = new ArrayList<String>();
+		processDir.add(Config.apkPath);
+		if (Config.instrument==Config.Instrument.stats) processDir.add("./tmp");
+		Options.v().set_process_dir(processDir);
 	}
 	
 	static void readLogProperties(){

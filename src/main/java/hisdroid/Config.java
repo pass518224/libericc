@@ -9,9 +9,10 @@ import org.json.JSONObject;
 
 public class Config {
 	public enum OutputFormat { none, jimple, apk; }
+	public enum Instrument { none, prune, stats;}
 
 	static JSONObject iccLogs;	
-	public static boolean prune = true;
+	public static Instrument instrument = Instrument.prune;
 	public static OutputFormat outputFormat = OutputFormat.apk;
 	public static String icclogPath;
 	public static String apkPath;
