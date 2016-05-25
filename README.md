@@ -5,7 +5,7 @@ Introduction
 
 Build
 ---
-gradle version > 2.12
+gradle version >= 2.12
 ```sh
 gradle build
 ```
