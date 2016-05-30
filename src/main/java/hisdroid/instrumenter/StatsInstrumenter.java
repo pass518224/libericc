@@ -18,7 +18,7 @@ import soot.jimple.IntConstant;
 import soot.jimple.Jimple;
 import soot.jimple.SwitchStmt;
 
-public class StatsInstrumenter extends Instrumenter {
+public class StatsInstrumenter extends AnalysisInstrumenter {
 	int branchId = 0;
 	SootMethodRef successMethodRef;
 	SootMethodRef failMethodRef;

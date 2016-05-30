@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import hisdroid.instrumenter.PreEvaluateInstrumenter;
 import hisdroid.instrumenter.StatsInstrumenter;
 import soot.PackManager;
 import soot.Scene;
@@ -22,12 +23,19 @@ public class Main {
 		if (!parseSuccess) return;
 		readLogProperties();
 		setOptions();
-		Config.loadIccLogs(Config.icclogPath);
-		if (Config.instrument==Config.Instrument.stats) {
-			StatsInstrumenter.storeStatsCounter();
+		
+		if (Config.instrument==Config.Instrument.pre_evaluate) {
+			PreEvaluateInstrumenter.storePreEvaluateLogger();
+			PackManager.v().getPack("wjtp").add(new Transform("wjtp.hisdroid", new HisdroidPreEvaluateTransformer()));
 		}
-
-		PackManager.v().getPack("wjtp").add(new Transform("wjtp.hisdroid", new HisdroidAnalysisTransformer()));
+		else {
+			if (Config.instrument==Config.Instrument.stats) {
+				StatsInstrumenter.storeStatsCounter();
+			}
+			Config.loadIccLogs(Config.icclogPath);
+			PackManager.v().getPack("wjtp").add(new Transform("wjtp.hisdroid", new HisdroidAnalysisTransformer()));
+		}
+		
 		Scene.v().loadNecessaryClasses();
 		soot.Main.v().autoSetOptions();
 		PackManager.v().runPacks();
@@ -59,7 +67,7 @@ public class Main {
 		Options.v().set_android_jars(Config.androidjars);
 		List<String> processDir = new ArrayList<String>();
 		processDir.add(Config.apkPath);
-		if (Config.instrument==Config.Instrument.stats) processDir.add("./tmp");
+		if (Config.instrument==Config.Instrument.stats||Config.instrument==Config.Instrument.pre_evaluate) processDir.add("./tmp");
 		Options.v().set_process_dir(processDir);
 	}
 	

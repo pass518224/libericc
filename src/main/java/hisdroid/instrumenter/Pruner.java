@@ -17,7 +17,7 @@ import soot.jimple.IntConstant;
 import soot.jimple.Jimple;
 import soot.jimple.SwitchStmt;
 
-public class Pruner extends Instrumenter {
+public class Pruner extends AnalysisInstrumenter {
 	
 	public Pruner(Analyzer analyzer){
 		super(analyzer);

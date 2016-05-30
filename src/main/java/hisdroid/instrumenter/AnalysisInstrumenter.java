@@ -50,11 +50,11 @@ import soot.jimple.SwitchStmt;
 import soot.jimple.TableSwitchStmt;
 import soot.util.queue.QueueReader;
 
-abstract public class Instrumenter {
+abstract public class AnalysisInstrumenter {
 	static protected final Logger logger = Logger.getLogger("HisDroid");
 	Analyzer analyzer;
 	
-	public Instrumenter(Analyzer analyzer){
+	public AnalysisInstrumenter(Analyzer analyzer){
 		this.analyzer = analyzer;
 	}
 	
@@ -70,13 +70,11 @@ abstract public class Instrumenter {
 		logger.info("End instrument");
 	}
 	
-	boolean shouldInstrument(SootMethod s) {
+	public boolean shouldInstrument(SootMethod s) {
 		String packageName = s.getDeclaringClass().getJavaPackageName();
-		return !s.getDeclaringClass().isLibraryClass()
-				&& !s.isJavaLibraryMethod()
-				&& !s.isPhantom()
-				&& !packageName.startsWith("android.support")
-				&& !packageName.startsWith("dalvik.system");
+		return s.getDeclaringClass().isApplicationClass() &&
+				s.isConcrete() &&
+				!packageName.startsWith("android.");
 	}
 	
 	void instrument(SootMethod m) {
@@ -252,7 +250,7 @@ abstract public class Instrumenter {
 		public boolean getDefaultTargetIsReachable() { return defaultTargetIsReachable; }
 	}
 	
-	ResultOfSwitch resultAtSwitch(SwitchStmt stmt){
+	public ResultOfSwitch resultAtSwitch(SwitchStmt stmt){
 		Map<Value, GeneralValue> map = analyzer.resultsAt(stmt);
 		Value key = stmt.getKey();
 		

@@ -9,14 +9,15 @@ import org.json.JSONObject;
 
 public class Config {
 	public enum OutputFormat { none, jimple, apk; }
-	public enum Instrument { none, prune, stats;}
+	public enum Instrument { none, prune, stats, pre_evaluate;}
 
-	static JSONObject iccLogs;	
+	static JSONObject iccLogs;
 	public static Instrument instrument = Instrument.prune;
 	public static OutputFormat outputFormat = OutputFormat.apk;
 	public static String icclogPath;
 	public static String apkPath;
 	public static String androidjars;
+	public static String adblogPath = null;
 	
 	static public void loadIccLogs(String filename){
 		String content = null;

@@ -10,7 +10,7 @@ import soot.Unit;
 import soot.jimple.IfStmt;
 import soot.jimple.SwitchStmt;
 
-public class LogOnly extends Instrumenter {
+public class LogOnly extends AnalysisInstrumenter {
 
 	public LogOnly(Analyzer analyzer){
 		super(analyzer);

@@ -19,7 +19,6 @@ public class CmdParser {
 				Option.builder("l").longOpt("log")
 				.hasArg().argName("logfile")
 				.desc("ICC Log in JSON format")
-				.required()
 				.build());
 		options.addOption(
 				Option.builder("a").longOpt("apk")
@@ -36,19 +35,22 @@ public class CmdParser {
 		options.addOption(
 				Option.builder("i").longOpt("instrument")
 				.hasArg().argName("type")
-				.desc("Instrument type [none, prune, stats] (Default: prune)")
+				.desc("Instrument type [none, prune, stats, pre-evaluate] (Default: prune)")
 				.build());
 		options.addOption(
 				Option.builder("f").longOpt("output-format")
 				.hasArg().argName("format")
 				.desc("Output Format [none, apk, jimple] (Default: apk)")
 				.build());
+		options.addOption(
+				Option.builder("e").longOpt("evaluate")
+				.hasArg().argName("adblog")
+				.desc("evaluate accuracy with runtime adb log")
+				.build());
 		
 		CommandLineParser parser = new DefaultParser();
 		try {
 			CommandLine line = parser.parse(options, args);
-			Config.icclogPath = line.getOptionValue("l");
-			logger.config(String.format("icclogPath = %s", Config.icclogPath));
 			Config.apkPath = line.getOptionValue("a");
 			logger.config(String.format("apkPath = %s", Config.apkPath));
 			Config.androidjars = line.getOptionValue("j");
@@ -63,6 +65,9 @@ public class CmdParser {
 					break;
 				case "stats":
 					Config.instrument = Config.Instrument.stats;
+					break;
+				case "pre-evaluate":
+					Config.instrument = Config.Instrument.pre_evaluate;
 					break;
 				default:
 					throw new ParseException("Unknown argument in -i");
@@ -84,6 +89,17 @@ public class CmdParser {
 					throw new ParseException("Unknown argument in -f");
 				}
 				logger.config("outputFormat = "+line.getOptionValue("f"));
+			}
+			if (line.hasOption("e")) {
+				logger.config(String.format("adblogPath = %s", Config.adblogPath));
+				Config.adblogPath = line.getOptionValue("e");
+			}
+			if (line.hasOption("l")) {
+				logger.config(String.format("icclogPath = %s", Config.icclogPath));
+				Config.icclogPath = line.getOptionValue("l");
+			}
+			else if (Config.instrument != Config.Instrument.pre_evaluate) {
+				throw new ParseException("-l is required");
 			}
 		}
 		catch (ParseException e) {

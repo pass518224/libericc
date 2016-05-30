@@ -2,10 +2,10 @@ package hisdroid;
 
 import java.util.Map;
 
-import hisdroid.instrumenter.StatsInstrumenter;
-import hisdroid.instrumenter.Instrumenter;
+import hisdroid.instrumenter.AnalysisInstrumenter;
 import hisdroid.instrumenter.LogOnly;
 import hisdroid.instrumenter.Pruner;
+import hisdroid.instrumenter.StatsInstrumenter;
 import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -24,7 +24,7 @@ class HisdroidAnalysisTransformer extends SceneTransformer {
 		Analyzer analyzer = new IDEAnalyzer();
 		analyzer.analyze(Scene.v().getMainMethod());
 		
-		Instrumenter instrumenter;
+		AnalysisInstrumenter instrumenter;
 		switch(Config.instrument) {
 		case none:
 			instrumenter = new LogOnly(analyzer);
@@ -37,5 +37,10 @@ class HisdroidAnalysisTransformer extends SceneTransformer {
 			instrumenter = new StatsInstrumenter(analyzer);
 		}
 		instrumenter.instrument();
+		
+		if (Config.adblogPath != null) {
+			Evaluator evaluator = new Evaluator(instrumenter);
+			evaluator.evaluate();
+		}
 	}
 }
