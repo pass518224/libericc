@@ -70,7 +70,7 @@ public class ActivityOnActivityResultHandler extends CallHandler {
 			int ind = destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode);
 			if (ind == 0 || ind == 1) {
 				Value arg = ie.getArgs().get(ind);
-				new ConstantEdge(new PrimitiveDataValue<Integer>(Integer.class, ((IntConstant)arg).value));
+				return new ConstantEdge(new PrimitiveDataValue<Integer>(Integer.class, ((IntConstant)arg).value));
 			}
 		}
 		else if (srcNode.equivTo(iccNo) && destinationMethod.getActiveBody().getParameterLocals().indexOf(destNode)==2) {
