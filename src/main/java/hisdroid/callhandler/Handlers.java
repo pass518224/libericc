@@ -75,15 +75,19 @@ public class Handlers {
 	static public void insertHandler(CallHandler handler){
 		Set<MethodSig> sigs = handler.getTargets();
 		for (MethodSig sig: sigs){
-			String methodSubSignature = sig.subSignature;
-			SootClass declaringClass = Scene.v().getSootClass(sig.className);
-			Map<SootClass, CallHandler> m2 = m.get(methodSubSignature);
-			if (m2 == null) {
-				m2 = new HashMap<SootClass, CallHandler>();
-				m.put(methodSubSignature, m2);
-			}
-			m2.put(declaringClass, handler);
+			insertHandler(sig, handler);
 		}
+	}
+	
+	static public void insertHandler(MethodSig sig, CallHandler handler){
+		String methodSubSignature = sig.subSignature;
+		SootClass declaringClass = Scene.v().getSootClass(sig.className);
+		Map<SootClass, CallHandler> m2 = m.get(methodSubSignature);
+		if (m2 == null) {
+			m2 = new HashMap<SootClass, CallHandler>();
+			m.put(methodSubSignature, m2);
+		}
+		m2.put(declaringClass, handler);
 	}
 	
 	static public boolean isIgnoredMethod(SootMethod m) {
