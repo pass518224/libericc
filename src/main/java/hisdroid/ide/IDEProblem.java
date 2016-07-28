@@ -29,6 +29,7 @@ import hisdroid.value.*;
 import soot.NullType;
 import soot.PointsToAnalysis;
 import soot.PointsToSet;
+import soot.PrimType;
 import soot.Scene;
 import soot.SootMethod;
 import soot.Type;
@@ -160,11 +161,17 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			final AssignStmt assign = (AssignStmt) curr;
 			final Value leftOp = assign.getLeftOp();
 			final Value rightOp = assign.getRightOp();
-			
-			if (rightOp instanceof Constant) {
-				if (currNode.equivTo(zeroValue()) && succNode.equivTo(leftOp)) {
+
+			if (currNode.equivTo(zeroValue()) && succNode.equivTo(leftOp)) {
+				if (rightOp instanceof Constant) {
 					return utility.getEdgeFromConstant((Constant)rightOp);
 				}
+				if (rightOp instanceof CmpExpr || rightOp instanceof CmplExpr || rightOp instanceof CmpgExpr) {
+					BinopExpr be = (BinopExpr) rightOp;
+					Value op1 = be.getOp1(), op2 = be.getOp2();
+					return new ConstantEdge(new CmpValue(curr, op1, op2));
+				}
+				return new ConstantEdge(BottomValue.v());
 			}
 			if (rightOp instanceof CastExpr) {
 				Value r = ((CastExpr)rightOp).getOp();
@@ -183,12 +190,6 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 						return new CastEdge(ValueType.Double);
 					}
 				}
-				return allTopFunction();
-			}
-			if (rightOp instanceof CmpExpr || rightOp instanceof CmplExpr || rightOp instanceof CmpgExpr) {
-				BinopExpr be = (BinopExpr) rightOp;
-				Value op1 = be.getOp1(), op2 = be.getOp2();
-				return new ConstantEdge(new CmpValue(curr, op1, op2));
 			}
 		}
 		return EdgeIdentity.v();
@@ -249,6 +250,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 			final AssignStmt assign = (AssignStmt) curr;
 			final Value leftOp = assign.getLeftOp();
 			final Value rightOp = assign.getRightOp();
+			Type leftType = leftOp.getType();
 			if (rightOp instanceof Constant) {
 				return new Transfer<Value>(leftOp, zeroValue());
 			}
@@ -257,6 +259,9 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 				return new Transfer<Value>(leftOp, r);
 			}
 			if (rightOp instanceof CmpExpr || rightOp instanceof CmplExpr || rightOp instanceof CmpgExpr) {
+				return new Transfer<Value>(leftOp, zeroValue());
+			}
+			if (leftType instanceof PrimType) {
 				return new Transfer<Value>(leftOp, zeroValue());
 			}
 			return new FlowFunction<Value>(){
@@ -272,7 +277,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 					if (source.equivTo(rightOp)) {
 						res.add(leftOp);
 					}
-					else {
+					/*else {
 						PointsToSet rightPointsToSet = null, sourcePointsToSet = null;
 						if (rightOp instanceof Local) {
 							Local rightLocal = (Local) rightOp;
@@ -303,7 +308,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 						if (rightPointsToSet != null && sourcePointsToSet != null && rightPointsToSet.hasNonEmptyIntersection(sourcePointsToSet)) {
 							res.add(leftOp);
 						}
-					}
+					}*/
 					
 					return res;
 				}
