@@ -13,9 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import hisdroid.callhandler.AutoCallHandler;
+import hisdroid.callhandler.CallHandler.MethodSig;
+import hisdroid.callhandler.Handlers;
 import soot.ArrayType;
+import soot.Hierarchy;
 import soot.IntType;
 import soot.Local;
 import soot.Modifier;
@@ -36,6 +42,7 @@ import soot.jimple.IntConstant;
 import soot.jimple.Jimple;
 import soot.jimple.JimpleBody;
 import soot.jimple.NullConstant;
+import soot.jimple.StringConstant;
 import soot.options.Options;
 
 public class DummyMainCreator {
@@ -221,6 +228,63 @@ public class DummyMainCreator {
 					break;
 				}
 			}
+			// icc to system_server
+			/*String target = iccLog.getString("Target");
+			try {
+				if (target.equals("system_server") || target.equals("system_server]")) {
+					String ifaceName = iccLog.getString("Descriptor");
+					JSONObject result = iccLog.getJSONObject("Result");
+					String methodName = result.getString("Name");
+					JSONArray params = result.getJSONArray("Params");
+					SootClass iface = Scene.v().getSootClass(ifaceName);
+					
+					//logger.info(iface+" method count: "+iface.getMethodCount());
+					//logger.info("ICC to interface: "+iface);
+					if (iface.isInterface()) {
+						for (SootClass subClass: Scene.v().getActiveHierarchy().getImplementersOf(iface)) {
+							String className = subClass.getName();
+							if (className.endsWith("Service")) {
+								Local tmpLocal = classToLocal.get(className);
+								if (tmpLocal == null) {
+									tmpLocal = createLocal(className);
+									classToLocal.put(className, tmpLocal);
+									initClass(className, tmpLocal);
+								}
+								SootMethod targetMethod = iface.getMethodByName(methodName);
+								Value[] values = new Value[targetMethod.getParameterCount()];
+								for (int i=0; i<targetMethod.getParameterCount(); i++) {
+									String value = params.getString(i);
+									switch (targetMethod.getParameterType(i).toString()){
+									case "int":
+										values[i] = IntConstant.v(Integer.parseInt(value));
+										break;
+									case "boolean":
+										values[i] = IntConstant.v(value.equals("True")? 1: 0);
+										break;
+									case "java.lang.String":
+										if (value.equals("None")) values[i] = NullConstant.v();
+										else values[i] = StringConstant.v(value);
+										break;
+									case "android.content.Intent":
+										values[i] = NullConstant.v();
+										break;
+									default:
+										values[i] = NullConstant.v();
+									}
+								}
+								addMethodCall(tmpLocal, className, methodName, values);
+								Handlers.insertHandler(AutoCallHandler.v().new MethodSig(className, targetMethod.getSubSignature()), AutoCallHandler.v());
+							}
+						}
+					}
+					else {
+						for (SootClass subClass: Scene.v().getActiveHierarchy().getSubclassesOf(iface)) {
+							logger.info("\t"+subClass);
+						}
+					}
+				}
+			}
+			catch (JSONException e) {}*/
 		}
 		// add return
 		Unit returnStmt = Jimple.v().newReturnVoidStmt();
