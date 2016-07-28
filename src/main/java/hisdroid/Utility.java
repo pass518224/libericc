@@ -20,6 +20,15 @@ public class Utility {
 			case "SCHEDULE_RECEIVER_TRANSACTION":
 				return icc.getJSONObject("intent");
 			default:
+				for (String key: icc.keySet()) {
+					try {
+						JSONObject obj = icc.getJSONObject(key);
+						if (obj.has("Action")) {
+							return obj;
+						}
+					}
+					catch (Exception e) { continue; }
+				}
 				return null;
 			}
 		}
