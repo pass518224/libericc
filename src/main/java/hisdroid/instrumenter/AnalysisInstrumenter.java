@@ -23,6 +23,7 @@ import hisdroid.value.interfaces.ComparableGeneralValue;
 import hisdroid.value.interfaces.EqualableGeneralValue;
 import soot.Local;
 import soot.MethodOrMethodContext;
+import soot.PackManager;
 import soot.PatchingChain;
 import soot.Scene;
 import soot.SootMethod;
@@ -70,11 +71,13 @@ abstract public class AnalysisInstrumenter {
 		logger.info("End instrument");
 	}
 	
-	public boolean shouldInstrument(SootMethod s) {
+	public static boolean shouldInstrument(SootMethod s) {
 		String packageName = s.getDeclaringClass().getJavaPackageName();
 		return s.getDeclaringClass().isApplicationClass() &&
 				s.isConcrete() &&
-				!packageName.startsWith("android.");
+				!packageName.startsWith("android.") &&
+				!packageName.startsWith("com.android.") &&
+				!packageName.startsWith("hisdroid.");
 	}
 	
 	void instrument(SootMethod m) {
@@ -230,7 +233,7 @@ abstract public class AnalysisInstrumenter {
 		return TriLogic.Unknown;
 	}
 	
-	class ResultOfSwitch {
+	public class ResultOfSwitch {
 		boolean bottom;
 		Map<Integer, Unit> reachableValueToTarget;
 		boolean defaultTargetIsReachable;
@@ -319,13 +322,14 @@ abstract public class AnalysisInstrumenter {
 	}
 	
 	TriLogic isNullValue(GeneralValue v){
+		return TriLogic.Unknown;/* Test
 		if (v instanceof NullValue) return TriLogic.True;
 		else if (v instanceof BottomValue || v == null) return TriLogic.Unknown;
 		else if (v instanceof DataValue) {
 			DataValue<?> dv = (DataValue<?>) v;
 			if (dv.bottom()) return TriLogic.Unknown;
 		}
-		return TriLogic.False;
+		return TriLogic.False;*/
 	}
 	
 	PrimitiveDataValue<Integer> cmpValueToIntValue(CmpValue cv) {

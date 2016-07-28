@@ -21,22 +21,21 @@ import soot.jimple.IfStmt;
 import soot.jimple.IntConstant;
 import soot.jimple.Jimple;
 import soot.jimple.Stmt;
-import soot.jimple.StringConstant;
 import soot.jimple.SwitchStmt;
 
 public class PreEvaluateInstrumenter {
 	static protected final Logger logger = Logger.getLogger("HisDroid");
-	SootMethodRef switchLogRef = Scene.v().getSootClass("hisdroid.instrumenter.PreEvaluateLogger").getMethodByName("switchLog").makeRef();
-	SootMethodRef branchTrueLogRef = Scene.v().getSootClass("hisdroid.instrumenter.PreEvaluateLogger").getMethodByName("branchTrueLog").makeRef();
-	SootMethodRef branchFalseLogRef = Scene.v().getSootClass("hisdroid.instrumenter.PreEvaluateLogger").getMethodByName("branchFalseLog").makeRef();
+	SootMethodRef branchResultRef = Scene.v().getSootClass("hisdroid.instrumenter.PreEvaluateLogger").getMethodByName("branchResult").makeRef();
 	PrintWriter writer;
 	
 	public void instrument(){
 		logger.info("Start instrument");
 		try {
 			writer = new PrintWriter("branches", "UTF-8");
-			for (SootClass c: Scene.v().getApplicationClasses()) {
-				for (SootMethod s: c.getMethods()) {
+			List<SootClass> lsc = new ArrayList<SootClass>(Scene.v().getClasses());
+			for (SootClass sc: lsc) {
+				List<SootMethod> lsm = new ArrayList<SootMethod>(sc.getMethods());
+				for (SootMethod s: lsm) {
 					if (shouldInstrument(s)) {
 						logger.fine("Instrument "+s.toString());
 						instrument(s);
@@ -52,7 +51,34 @@ public class PreEvaluateInstrumenter {
 		String packageName = s.getDeclaringClass().getJavaPackageName();
 		return s.getDeclaringClass().isApplicationClass() &&
 				s.isConcrete() &&
-				!packageName.startsWith("android.");
+				!packageName.startsWith("android.") &&
+				!packageName.startsWith("com.android.") &&
+				!packageName.startsWith("hisdroid.") && 
+				(isIntentService(s.getDeclaringClass().getName()) || isBroadReceiver(s.getDeclaringClass().getName()));
+	}
+	
+	boolean isIntentService(String targetClass) {
+		try {
+			for (SootClass sc = Scene.v().getSootClass(targetClass); sc != null; sc = sc.getSuperclass()) {
+				if (sc.toString().equals("android.app.IntentService")) {
+					return true;
+				}
+			}
+		}
+		catch (Exception e) {}
+		return false;
+	}
+	
+	boolean isBroadReceiver(String targetClass) {
+		try {
+			for (SootClass sc = Scene.v().getSootClass(targetClass); sc != null; sc = sc.getSuperclass()) {
+				if (sc.toString().equals("android.content.BroadcastReceiver")) {
+					return true;
+				}
+			}
+		}
+		catch (Exception e) {}
+		return false;
 	}
 	
 	void instrument(SootMethod m) {
@@ -84,11 +110,11 @@ public class PreEvaluateInstrumenter {
 	void instrumentBranch(SootMethod method, IfStmt stmt, int branchId){
 		PatchingChain<Unit> unitChain = method.getActiveBody().getUnits();
 		Value condition = stmt.getCondition();
-		Unit logTrueUnit = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(branchTrueLogRef, StringConstant.v(method.toString()), IntConstant.v(branchId)));
+		Unit logTrueUnit = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(branchResultRef, IntConstant.v(branchHashCode(method, branchId)), IntConstant.v(1)));
 		unitChain.insertBefore(logTrueUnit, stmt);
 		Unit gotoEndUnit = Jimple.v().newGotoStmt(stmt);
 		unitChain.insertBefore(gotoEndUnit, logTrueUnit);
-		Unit logFalseUnit = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(branchFalseLogRef, StringConstant.v(method.toString()), IntConstant.v(branchId)));
+		Unit logFalseUnit = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(branchResultRef, IntConstant.v(branchHashCode(method, branchId)), IntConstant.v(0)));
 		unitChain.insertBefore(logFalseUnit, gotoEndUnit);
 		Unit ifTrueUnit = Jimple.v().newIfStmt(condition, logTrueUnit);
 		unitChain.insertBefore(ifTrueUnit, logFalseUnit);
@@ -97,9 +123,13 @@ public class PreEvaluateInstrumenter {
 	void instrumentSwitch(SootMethod method, SwitchStmt stmt, int branchId){
 		PatchingChain<Unit> unitChain = method.getActiveBody().getUnits();
 		Value key = stmt.getKey();
-		Unit logUnit = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(switchLogRef, StringConstant.v(method.toString()), IntConstant.v(branchId), key));
+		Unit logUnit = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(branchResultRef, IntConstant.v(branchHashCode(method, branchId)), key));
 		
 		unitChain.insertBefore(logUnit, stmt);
+	}
+	
+	static public int branchHashCode(SootMethod m, int i) {
+		return String.format("%s:%d", m, i).hashCode();
 	}
 	
 	static public void storePreEvaluateLogger(){

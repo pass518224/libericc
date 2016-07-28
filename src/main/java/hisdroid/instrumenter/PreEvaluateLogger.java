@@ -1,15 +1,31 @@
 package hisdroid.instrumenter;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class PreEvaluateLogger {
-	static public void switchLog(String method, int branchId, int value) {
-		System.out.println(String.format("hisdroid: %d at switch %s:%d", value, method, branchId));
-	}
+	/*static Map<Long, Integer> idResult2Count = new ConcurrentHashMap<Long, Integer>();
+	static long branchCount = 0;
+	static long threshold = 1000;*/
 	
-	static public void branchTrueLog(String method, int branchId) {
-		System.out.println(String.format("hisdroid: True at branch %s:%d", method, branchId));
+	public static void branchResult(int branchId, int value){
+		long idResult = ((long)branchId)<<32|value;
+		System.out.println(String.format("B: %d=%d", idResult, value));
+		/*Integer count = idResult2Count.get(idResult);
+		idResult2Count.put(idResult, count==null? 1: count+1);
+		branchCount++;
+		if (branchCount%threshold==0) {
+			dump();
+			idResult2Count.clear();
+		}*/
 	}
+
+	/*static void dump() {
+		System.out.println("Total Branch Count: "+branchCount);
+		for (Map.Entry<Long, Integer> entry: idResult2Count.entrySet()) {
+			//output.println(String.format("Branch Results: %d=%d", entry.getKey(), entry.getValue()));
+			System.out.println(String.format("B: %d=%d", entry.getKey(), entry.getValue()));
+		}
+	}*/
 	
-	static public void branchFalseLog(String method, int branchId) {
-		System.out.println(String.format("hisdroid: False at branch %s:%d", method, branchId));
-	}
 }
