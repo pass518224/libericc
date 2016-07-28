@@ -44,6 +44,9 @@ public class Main {
 		Date finish = new Date();
 		long t = finish.getTime() - start.getTime();
 		logger.info(String.format("Total time: %d min %d sec", t/60000, t%60000/1000));
+		
+		long usedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+		logger.info(String.format("Used Memory: %d MB", usedMemory/1024/1024));
 	}
 	
 	static void setOptions() {
@@ -52,6 +55,7 @@ public class Main {
 		Options.v().set_ignore_resolution_errors(true); // -ire
 		Options.v().set_src_prec(Options.src_prec_apk_class_jimple); // -src-prec apk-c-j
 		Options.v().set_force_overwrite(true);
+		Options.v().set_process_multiple_dex(true);
 		switch (Config.outputFormat) {
 		case none:
 			Options.v().set_output_format(Options.output_format_none); // -f n
@@ -67,6 +71,7 @@ public class Main {
 		Options.v().set_android_jars(Config.androidjars);
 		List<String> processDir = new ArrayList<String>();
 		processDir.add(Config.apkPath);
+		Options.v().setPhaseOption("cg", "enabled:false");
 		if (Config.instrument==Config.Instrument.stats||Config.instrument==Config.Instrument.pre_evaluate) processDir.add("./tmp");
 		Options.v().set_process_dir(processDir);
 	}
