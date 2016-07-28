@@ -1,7 +1,6 @@
 package hisdroid;
 
 import java.util.Map;
-
 import hisdroid.instrumenter.AnalysisInstrumenter;
 import hisdroid.instrumenter.LogOnly;
 import hisdroid.instrumenter.Pruner;
@@ -14,16 +13,19 @@ import soot.options.Options;
 class HisdroidAnalysisTransformer extends SceneTransformer {
 	@Override
 	protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
+		Evaluator evaluator = null;
 
 		new DummyMainCreator().createDummyMain();
-		
+		Options.v().setPhaseOption("cg", "enabled:true");
 		Options.v().setPhaseOption("cg.spark", "enabled:true");
 		Options.v().setPhaseOption("cg.spark", "string-constants:true");
 		PackManager.v().getPack("cg").apply();
 		
-		Analyzer analyzer = new IDEAnalyzer();
-		analyzer.analyze(Scene.v().getMainMethod());
+		if (Config.adblogPath != null) {
+			evaluator = new Evaluator();
+		}
 		
+		Analyzer analyzer = new IDEAnalyzer();
 		AnalysisInstrumenter instrumenter;
 		switch(Config.instrument) {
 		case none:
@@ -36,11 +38,11 @@ class HisdroidAnalysisTransformer extends SceneTransformer {
 		case stats:
 			instrumenter = new StatsInstrumenter(analyzer);
 		}
-		instrumenter.instrument();
-		
+		analyzer.analyze(Scene.v().getMainMethod());
+
 		if (Config.adblogPath != null) {
-			Evaluator evaluator = new Evaluator(instrumenter);
-			evaluator.evaluate();
+			evaluator.evaluate(instrumenter);
 		}
+		instrumenter.instrument();
 	}
 }
