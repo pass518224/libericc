@@ -41,4 +41,5 @@ dependencies {
 	compile 'org.json:json:20160212'
     compile 'commons-cli:commons-cli:1.3'
 	compile fileTree(dir: 'lib', include: 'soot-chchao-20160725.jar')
+	compile fileTree(dir: 'lib', include: 'trimmed-android.jar')
 }
