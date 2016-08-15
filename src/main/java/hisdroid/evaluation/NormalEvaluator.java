@@ -1,4 +1,4 @@
-package hisdroid;
+package hisdroid.evaluation;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import hisdroid.Config;
+import hisdroid.TriLogic;
 import hisdroid.instrumenter.AnalysisInstrumenter;
 import hisdroid.instrumenter.AnalysisInstrumenter.ResultOfSwitch;
 import soot.PatchingChain;
@@ -29,7 +31,7 @@ import soot.jimple.Stmt;
 import soot.jimple.SwitchStmt;
 import soot.jimple.TableSwitchStmt;
 
-public class Evaluator {
+public class NormalEvaluator implements Evaluator {
 	static protected final Logger logger = Logger.getLogger("HisDroid");
 	
 	AnalysisInstrumenter instrumenter;
@@ -43,11 +45,12 @@ public class Evaluator {
 		Success, Failed, UnableToDetermine;
 	}
 	
-	public Evaluator() {
+	public NormalEvaluator() {
 		loadAdbLog();
 		setReachedBranches();
 	}
 	
+	@Override
 	public void evaluate(AnalysisInstrumenter instrumenter) {
 		this.instrumenter = instrumenter;
 		for (String method: undecidedBranches.keySet()) {
@@ -64,6 +67,7 @@ public class Evaluator {
 						reachedBranchSuccess++;
 						if (instrumenter.resultAtBranch((IfStmt)stmt)!=TriLogic.Unknown) {
 							reachedBranchSuccessWithoutAllPath++;
+							logger.finer(String.format("Analysis Success without all path at Branch %s:%d %s", method, branchId, stmt));
 						}
 						it.remove();
 						logger.finer(String.format("Analysis Success at Branch %s:%d %s", method, branchId, stmt));
@@ -223,7 +227,8 @@ public class Evaluator {
 	
 	void loadAdbLog() {
 		try (BufferedReader br = new BufferedReader(new FileReader(Config.adblogPath))) {
-			Pattern pattern = Pattern.compile("hisdroid: (?<result>True|False|-?\\d+) at (branch|switch) (?<method>.*):(?<branchId>\\d+)");
+			//Pattern pattern = Pattern.compile("hisdroid: (?<result>True|False|-?\\d+) at (branch|switch) (?<method>.*):(?<branchId>\\d+)");
+			Pattern pattern = Pattern.compile("hisdroid: B: (?<method>.+):(?<branchId>\\d+)#(?<hash>-?\\d+)=(?<result>-?\\d+)");
 		    for (String line; (line = br.readLine()) != null; ) {
 		    	Matcher matcher = pattern.matcher(line);
 		    	if (matcher.find()) {
@@ -239,10 +244,7 @@ public class Evaluator {
 		    			branchResults.put(branchId, results);
 		    		}
 		    		String resultString = matcher.group("result");
-		    		int result;
-		    		if (resultString.equals("True")) result = 1;
-		    		else if (resultString.equals("False")) result = 0;
-		    		else result = Integer.parseInt(resultString);
+		    		int result = Integer.parseInt(resultString);
 		    		results.add(result);
 		    	}
 		    }

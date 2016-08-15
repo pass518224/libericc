@@ -2,7 +2,7 @@ package hisdroid;
 
 import java.util.Map;
 
-import hisdroid.instrumenter.PreEvaluateInstrumenter;
+import hisdroid.instrumenter.pre.PreEvaluateInstrumenter;
 import soot.SceneTransformer;
 
 class HisdroidPreEvaluateTransformer extends SceneTransformer {

@@ -9,7 +9,7 @@ import org.json.JSONObject;
 
 public class Config {
 	public enum OutputFormat { none, jimple, apk; }
-	public enum Instrument { none, prune, stats, pre_evaluate;}
+	public enum Instrument { none, prune, pre_evaluate;}
 
 	static JSONObject iccLogs;
 	public static Instrument instrument = Instrument.prune;
@@ -18,6 +18,7 @@ public class Config {
 	public static String apkPath;
 	public static String androidjars;
 	public static String adblogPath = null;
+	public static int iccNo = 0;
 	
 	static public void loadIccLogs(String filename){
 		String content = null;
@@ -31,10 +32,10 @@ public class Config {
 			s.close();
 		}
 		iccLogs = new JSONObject(content);
-		iccPreprocess();
+		iccPreProcess();
 	}
 	
-	static void iccPreprocess() {
+	static void iccPreProcess() {
 		for (String key: iccLogs.keySet()) {
 			try {
 				JSONObject map = new JSONObject();

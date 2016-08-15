@@ -277,7 +277,7 @@ public class IDEProblem extends DefaultJimpleIDETabulationProblem<Value, General
 					if (source.equivTo(rightOp)) {
 						res.add(leftOp);
 					}
-					/*else {
+					/*else { // points-to analysis
 						PointsToSet rightPointsToSet = null, sourcePointsToSet = null;
 						if (rightOp instanceof Local) {
 							Local rightLocal = (Local) rightOp;

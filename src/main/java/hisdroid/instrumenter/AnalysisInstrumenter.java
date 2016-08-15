@@ -23,7 +23,6 @@ import hisdroid.value.interfaces.ComparableGeneralValue;
 import hisdroid.value.interfaces.EqualableGeneralValue;
 import soot.Local;
 import soot.MethodOrMethodContext;
-import soot.PackManager;
 import soot.PatchingChain;
 import soot.Scene;
 import soot.SootMethod;
@@ -78,6 +77,10 @@ abstract public class AnalysisInstrumenter {
 				!packageName.startsWith("android.") &&
 				!packageName.startsWith("com.android.") &&
 				!packageName.startsWith("hisdroid.");
+	}
+	
+	public Analyzer getAnalyzer() {
+		return analyzer;
 	}
 	
 	void instrument(SootMethod m) {
@@ -322,8 +325,9 @@ abstract public class AnalysisInstrumenter {
 	}
 	
 	TriLogic isNullValue(GeneralValue v){
-		return TriLogic.Unknown;/* Test
-		if (v instanceof NullValue) return TriLogic.True;
+		return TriLogic.Unknown;
+		// disable null value test
+		/*if (v instanceof NullValue) return TriLogic.True;
 		else if (v instanceof BottomValue || v == null) return TriLogic.Unknown;
 		else if (v instanceof DataValue) {
 			DataValue<?> dv = (DataValue<?>) v;

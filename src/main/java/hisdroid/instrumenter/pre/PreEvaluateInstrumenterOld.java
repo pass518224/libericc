@@ -1,4 +1,4 @@
-package hisdroid.instrumenter;
+package hisdroid.instrumenter.pre;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,9 +23,9 @@ import soot.jimple.Jimple;
 import soot.jimple.Stmt;
 import soot.jimple.SwitchStmt;
 
-public class PreEvaluateInstrumenter {
+public class PreEvaluateInstrumenterOld {
 	static protected final Logger logger = Logger.getLogger("HisDroid");
-	SootMethodRef branchResultRef = Scene.v().getSootClass("hisdroid.instrumenter.PreEvaluateLogger").getMethodByName("branchResult").makeRef();
+	SootMethodRef branchResultRef = Scene.v().getSootClass("hisdroid.instrumenter.pre.PreEvaluateLogger").getMethodByName("branchResult").makeRef();
 	PrintWriter writer;
 	
 	public void instrument(){
@@ -53,8 +53,7 @@ public class PreEvaluateInstrumenter {
 				s.isConcrete() &&
 				!packageName.startsWith("android.") &&
 				!packageName.startsWith("com.android.") &&
-				!packageName.startsWith("hisdroid.") && 
-				(isIntentService(s.getDeclaringClass().getName()) || isBroadReceiver(s.getDeclaringClass().getName()));
+				!packageName.startsWith("hisdroid.");
 	}
 	
 	boolean isIntentService(String targetClass) {
@@ -136,9 +135,9 @@ public class PreEvaluateInstrumenter {
 		InputStream in = null;
 		OutputStream out = null;
 		try {
-			in = Object.class.getResourceAsStream("/hisdroid/instrumenter/PreEvaluateLogger.class");
-			new File("tmp/hisdroid/instrumenter").mkdirs();
-			out = new FileOutputStream("tmp/hisdroid/instrumenter/PreEvaluateLogger.class");
+			in = Object.class.getResourceAsStream("/hisdroid/instrumenter/pre/PreEvaluateLogger.class");
+			new File("tmp/hisdroid/instrumenter/pre").mkdirs();
+			out = new FileOutputStream("tmp/hisdroid/instrumenter/pre/PreEvaluateLogger.class");
 			            
 			int readBytes;
 			byte[] buffer = new byte[4096];

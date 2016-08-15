@@ -1,9 +1,9 @@
-package hisdroid.instrumenter;
+package hisdroid.instrumenter.pre;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PreEvaluateLogger {
+public class PreEvaluateLoggerOld {
 	/*static Map<Long, Integer> idResult2Count = new ConcurrentHashMap<Long, Integer>();
 	static long branchCount = 0;
 	static long threshold = 1000;*/

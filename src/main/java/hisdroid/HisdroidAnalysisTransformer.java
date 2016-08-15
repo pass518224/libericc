@@ -1,10 +1,13 @@
 package hisdroid;
 
 import java.util.Map;
+
+import hisdroid.evaluation.Evaluator;
+import hisdroid.evaluation.NormalEvaluator;
+import hisdroid.evaluation.OneICCEvaluator;
 import hisdroid.instrumenter.AnalysisInstrumenter;
 import hisdroid.instrumenter.LogOnly;
 import hisdroid.instrumenter.Pruner;
-import hisdroid.instrumenter.StatsInstrumenter;
 import soot.PackManager;
 import soot.Scene;
 import soot.SceneTransformer;
@@ -22,7 +25,12 @@ class HisdroidAnalysisTransformer extends SceneTransformer {
 		PackManager.v().getPack("cg").apply();
 		
 		if (Config.adblogPath != null) {
-			evaluator = new Evaluator();
+			if (Config.iccNo==0) {
+				evaluator = new NormalEvaluator();
+			}
+			else {
+				evaluator = new OneICCEvaluator();
+			}
 		}
 		
 		Analyzer analyzer = new IDEAnalyzer();
@@ -35,8 +43,6 @@ class HisdroidAnalysisTransformer extends SceneTransformer {
 		case prune:
 			instrumenter = new Pruner(analyzer);
 			break;
-		case stats:
-			instrumenter = new StatsInstrumenter(analyzer);
 		}
 		analyzer.analyze(Scene.v().getMainMethod());
 

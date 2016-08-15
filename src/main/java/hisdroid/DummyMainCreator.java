@@ -94,6 +94,7 @@ public class DummyMainCreator {
 		// for each icc record
 		for (String id: sortedICC){
 			JSONObject iccLog = iccLogs.getJSONObject(id);
+			boolean processThisICC = Config.iccNo==0||Integer.parseInt(id)==Config.iccNo;
 			
 			// icc from system_server
 			String source = iccLog.getString("Source");
@@ -119,9 +120,11 @@ public class DummyMainCreator {
 						classToLocal.put(targetClass, tmpLocal);
 						initClass(targetClass, tmpLocal);
 					}
-					addMethodCall(tmpLocal, targetClass, "onCreate", NullConstant.v());
-					addMethodCall(tmpLocal, targetClass, "onStart");
-					addMethodCall(tmpLocal, targetClass, "onResume");
+					if (processThisICC) {
+						addMethodCall(tmpLocal, targetClass, "onCreate", NullConstant.v());
+						addMethodCall(tmpLocal, targetClass, "onStart");
+						addMethodCall(tmpLocal, targetClass, "onResume");
+					}
 					break;
 				case "SCHEDULE_SEND_RESULT_TRANSACTION":
 					binder = iccLog.getString("b");
@@ -129,7 +132,7 @@ public class DummyMainCreator {
 					tmpLocal = classToLocal.get(targetClass);
 					int requestCode = iccLog.getJSONObject("ri").getInt("mRequestCode");
 					int resultCode = iccLog.getJSONObject("ri").getInt("mResultCode");
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onActivityResult", IntConstant.v(requestCode), IntConstant.v(resultCode), NullConstant.v());
 					}
 					break;
@@ -137,7 +140,7 @@ public class DummyMainCreator {
 					binder = iccLog.getString("b");
 					targetClass = binderToClass.get(binder);
 					tmpLocal = classToLocal.get(targetClass);
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onResume");
 					}
 					break;
@@ -145,7 +148,7 @@ public class DummyMainCreator {
 					binder = iccLog.getString("b");
 					targetClass = binderToClass.get(binder);
 					tmpLocal = classToLocal.get(targetClass);
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onPause");
 					}
 					break;
@@ -153,7 +156,7 @@ public class DummyMainCreator {
 					binder = iccLog.getString("b");
 					targetClass = binderToClass.get(binder);
 					tmpLocal = classToLocal.get(targetClass);
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onStop");
 					}
 					break;
@@ -161,7 +164,7 @@ public class DummyMainCreator {
 					binder = iccLog.getString("b");
 					targetClass = binderToClass.get(binder);
 					tmpLocal = classToLocal.get(targetClass);
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onDestroy");
 					}
 					break;
@@ -175,7 +178,9 @@ public class DummyMainCreator {
 						classToLocal.put(targetClass, tmpLocal);
 						initClass(targetClass, tmpLocal);
 					}
-					addMethodCall(tmpLocal, targetClass, "onCreate");
+					if (processThisICC) {
+						addMethodCall(tmpLocal, targetClass, "onCreate");
+					}
 					break;
 				case "SCHEDULE_SERVICE_ARGS_TRANSACTION":
 					binder = iccLog.getString("token");
@@ -183,12 +188,16 @@ public class DummyMainCreator {
 					tmpLocal = classToLocal.get(targetClass);
 					if (targetClass != null) {
 						if (isIntentService(targetClass)) {
-							addMethodCall(tmpLocal, targetClass, "onHandleIntent", NullConstant.v());
+							if (processThisICC) {
+								addMethodCall(tmpLocal, targetClass, "onHandleIntent", NullConstant.v());
+							}
 						}
 						else {
 							int startId = Integer.parseInt(iccLog.getString("startId"));
 							int flags = Integer.parseInt(iccLog.getString("fl"));
-							addMethodCall(tmpLocal, targetClass, "onStartCommand", NullConstant.v(), IntConstant.v(flags), IntConstant.v(startId));
+							if (processThisICC) {
+								addMethodCall(tmpLocal, targetClass, "onStartCommand", NullConstant.v(), IntConstant.v(flags), IntConstant.v(startId));
+							}
 						}
 					}
 					break;
@@ -196,7 +205,7 @@ public class DummyMainCreator {
 					binder = iccLog.getString("token");
 					targetClass = binderToClass.get(binder);
 					tmpLocal = classToLocal.get(targetClass);
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onBind", NullConstant.v());
 					}
 					break;
@@ -204,7 +213,7 @@ public class DummyMainCreator {
 					binder = iccLog.getString("token");
 					targetClass = binderToClass.get(binder);
 					tmpLocal = classToLocal.get(targetClass);
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onUnbind", NullConstant.v());
 					}
 					break;
@@ -212,7 +221,7 @@ public class DummyMainCreator {
 					binder = iccLog.getString("token");
 					targetClass = binderToClass.get(binder);
 					tmpLocal = classToLocal.get(targetClass);
-					if (targetClass != null) {
+					if (targetClass != null && processThisICC) {
 						addMethodCall(tmpLocal, targetClass, "onDestroy");
 					}
 					break;
@@ -224,7 +233,9 @@ public class DummyMainCreator {
 						classToLocal.put(targetClass, tmpLocal);
 						initClass(targetClass, tmpLocal);
 					}
-					addMethodCall(tmpLocal, targetClass, "onReceive", NullConstant.v(), NullConstant.v());
+					if (processThisICC) {
+						addMethodCall(tmpLocal, targetClass, "onReceive", NullConstant.v(), NullConstant.v());
+					}
 					break;
 				}
 			}
@@ -298,6 +309,7 @@ public class DummyMainCreator {
 	}
 	
 	void initClass(String targetClass, Local tmpLocal){
+		Scene.v().getSootClass(targetClass).setResolvingLevel(SootClass.BODIES);
 		try {
 			Expr newExpr = Jimple.v().newNewExpr(Scene.v().getSootClass(targetClass).getType());
 			Unit assignStmt = Jimple.v().newAssignStmt(tmpLocal, newExpr);
@@ -343,16 +355,6 @@ public class DummyMainCreator {
 		}
 		catch (Exception e) {}
 	}
-	
-	/*void addAssignStmtWithMethodCall(Local lvalue, Local base, String targetClass, String targetMethod, Value ... args){
-		logger.finest(String.format("Add method call %s.%s", targetClass, targetMethod));
-		try {
-			Expr invokeExpr = Jimple.v().newVirtualInvokeExpr(base, Scene.v().getSootClass(targetClass).getMethodByName(targetMethod).makeRef(), args);
-			Unit assignStmt = Jimple.v().newAssignStmt(lvalue, invokeExpr);
-			units.addLast(assignStmt);
-		}
-		catch (Exception e) {}
-	}*/
 	
 	void dumpMethod(){
 		// write dummyMain to file

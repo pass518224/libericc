@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import hisdroid.instrumenter.PreEvaluateInstrumenter;
-import hisdroid.instrumenter.StatsInstrumenter;
+import hisdroid.instrumenter.pre.PreEvaluateInstrumenterOld;
+import hisdroid.instrumenter.pre.PreEvaluateInstrumenter;
 import soot.PackManager;
 import soot.Scene;
 import soot.Transform;
@@ -25,13 +25,10 @@ public class Main {
 		setOptions();
 		
 		if (Config.instrument==Config.Instrument.pre_evaluate) {
-			PreEvaluateInstrumenter.storePreEvaluateLogger();
+			PreEvaluateInstrumenterOld.storePreEvaluateLogger();
 			PackManager.v().getPack("wjtp").add(new Transform("wjtp.hisdroid", new HisdroidPreEvaluateTransformer()));
 		}
 		else {
-			if (Config.instrument==Config.Instrument.stats) {
-				StatsInstrumenter.storeStatsCounter();
-			}
 			Config.loadIccLogs(Config.icclogPath);
 			PackManager.v().getPack("wjtp").add(new Transform("wjtp.hisdroid", new HisdroidAnalysisTransformer()));
 		}
@@ -53,7 +50,7 @@ public class Main {
 		Options.v().set_whole_program(true); // -w
 		Options.v().set_allow_phantom_refs(true); // -allow-phantom-refs
 		Options.v().set_ignore_resolution_errors(true); // -ire
-		Options.v().set_src_prec(Options.src_prec_apk_class_jimple); // -src-prec apk-c-j
+		Options.v().set_src_prec(Options.src_prec_apk); // -src-prec apk
 		Options.v().set_force_overwrite(true);
 		Options.v().set_process_multiple_dex(true);
 		switch (Config.outputFormat) {
@@ -72,7 +69,7 @@ public class Main {
 		List<String> processDir = new ArrayList<String>();
 		processDir.add(Config.apkPath);
 		Options.v().setPhaseOption("cg", "enabled:false");
-		if (Config.instrument==Config.Instrument.stats||Config.instrument==Config.Instrument.pre_evaluate) processDir.add("./tmp");
+		if (Config.instrument==Config.Instrument.pre_evaluate) processDir.add("./tmp");
 		Options.v().set_process_dir(processDir);
 	}
 	
