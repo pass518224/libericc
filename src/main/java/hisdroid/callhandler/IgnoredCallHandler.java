@@ -7,7 +7,7 @@ import heros.EdgeFunction;
 import heros.FlowFunction;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
-import heros.flowfunc.Transfer;
+import hisdroid.flowfunc.Transfer;
 import hisdroid.edgefunc.ConstantEdge;
 import hisdroid.value.BottomValue;
 import hisdroid.value.GeneralValue;

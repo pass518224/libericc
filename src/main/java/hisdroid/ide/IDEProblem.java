@@ -19,7 +19,7 @@ import heros.edgefunc.AllTop;
 import heros.edgefunc.EdgeIdentity;
 import heros.flowfunc.Identity;
 import heros.flowfunc.KillAll;
-import heros.flowfunc.Transfer;
+import hisdroid.flowfunc.Transfer;
 import hisdroid.ValueType;
 import hisdroid.callhandler.CallHandler;
 import hisdroid.callhandler.Handlers;
