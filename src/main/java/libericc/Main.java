@@ -24,11 +24,11 @@ public class Main {
 			// store the logger class from jar file to tmp dir
 			// soot will load the logger class in tmp dir
 			PreEvaluateInstrumenter.storePreEvaluateLogger();
-			PackManager.v().getPack("wjtp").add(new Transform("wjtp.libericc", new HisdroidPreEvaluateTransformer()));
+			PackManager.v().getPack("wjtp").add(new Transform("wjtp.libericc", new LibericcPreEvaluateTransformer()));
 		} 
 		else {
 			Config.loadIccLogs(Config.icclogPath);
-			PackManager.v().getPack("wjtp").add(new Transform("wjtp.libericc", new HisdroidAnalysisTransformer()));
+			PackManager.v().getPack("wjtp").add(new Transform("wjtp.libericc", new LibericcAnalysisTransformer()));
 		}
 		
 		// start soot

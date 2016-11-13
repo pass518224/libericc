@@ -13,7 +13,7 @@ apply plugin: 'eclipse'
 
 jar {
 	manifest {
-		attributes 'Main-Class': 'hisdroid.Main'
+		attributes 'Main-Class': 'libericc.Main'
 	}
 	from {
 		configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }

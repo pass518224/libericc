@@ -26,6 +26,7 @@ class CoverageTransformer extends SceneTransformer {
 		intentService = Scene.v().getActiveHierarchy().getSubclassesOf(Scene.v().getSootClass("android.app.IntentService")).size();
 		broadcastReceiver = Scene.v().getActiveHierarchy().getSubclassesOf(Scene.v().getSootClass("android.content.BroadcastReceiver")).size();
 		contentProvider = Scene.v().getActiveHierarchy().getSubclassesOf(Scene.v().getSootClass("android.content.ContentProvider")).size();
+		
 		for (SootClass sc: new ArrayList<SootClass>(Scene.v().getClasses())) {
 			for (SootMethod sm: new ArrayList<SootMethod>(sc.getMethods())) {
 				if (shouldCount(sm)) {
@@ -38,10 +39,6 @@ class CoverageTransformer extends SceneTransformer {
 				}
 			}
 		}
-		/*System.out.println(Scene.v().getActiveHierarchy().getSubclassesOf(Scene.v().getSootClass("android.app.Activity")));
-		System.out.println(Scene.v().getActiveHierarchy().getSubclassesOf(Scene.v().getSootClass("android.app.Service")));
-		System.out.println(Scene.v().getActiveHierarchy().getSubclassesOf(Scene.v().getSootClass("android.content.BroadcastReceiver")));
-		System.out.println(Scene.v().getActiveHierarchy().getSubclassesOf(Scene.v().getSootClass("android.content.ContentProvider")));*/
 		System.out.println("totalCode: "+totalCode);
 		System.out.println("totalMethod: "+totalMethod);
 		System.out.println("activity: "+activity);

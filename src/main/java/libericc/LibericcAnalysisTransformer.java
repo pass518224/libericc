@@ -20,7 +20,7 @@ import soot.Scene;
 import soot.SceneTransformer;
 import soot.options.Options;
 
-class HisdroidAnalysisTransformer extends SceneTransformer {
+class LibericcAnalysisTransformer extends SceneTransformer {
 	@Override
 	protected void internalTransform(String phaseName, @SuppressWarnings("rawtypes") Map options) {
 		Evaluator evaluator = null;

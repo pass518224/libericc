@@ -8,6 +8,10 @@ import soot.Scene;
 import soot.Transform;
 import soot.options.Options;
 
+/*
+ * To evaluate the coverage of the life cycle entries
+ */
+
 public class Main {
 	public static String androidjars, apkPath;
 	

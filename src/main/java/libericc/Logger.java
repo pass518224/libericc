@@ -10,7 +10,7 @@ public class Logger {
 	static {
 		try {
 			LogManager.getLogManager().readConfiguration(Object.class.getResourceAsStream("/javalog.properties"));
-			logger = java.util.logging.Logger.getLogger("HisDroid");
+			logger = java.util.logging.Logger.getLogger("Libericc");
 		}
 		catch (Exception e) {
 			System.err.println("Cannot Find Log Properties");

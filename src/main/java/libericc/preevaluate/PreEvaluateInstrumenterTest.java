@@ -38,7 +38,7 @@ import soot.jimple.StringConstant;
 import soot.jimple.SwitchStmt;
 
 public class PreEvaluateInstrumenterTest {
-	static protected final Logger logger = Logger.getLogger("HisDroid");
+	static protected final Logger logger = Logger.getLogger("Libericc");
 	
 	static String evaloggerPackage = "libericc.preevaluate";
 	static String evaloggerName = "PreEvaluateLoggerTest";

@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 import libericc.Config;
 import libericc.Logger;
 import libericc.PredictResult;
-import libericc.decider.AnalysisDecider;
 import libericc.decider.Decider;
 import libericc.decider.ResultOfSwitch;
 import libericc.preevaluate.PreEvaluateInstrumenter;
@@ -40,6 +39,10 @@ import soot.jimple.SwitchStmt;
 import soot.jimple.TableSwitchStmt;
 import soot.jimple.ThrowStmt;
 import soot.jimple.toolkits.ide.icfg.JimpleBasedInterproceduralCFG;
+
+/*
+ * Default evaluator, conservative
+ */
 
 public class NormalEvaluator implements Evaluator {
 	Decider decider;
