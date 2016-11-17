@@ -23,44 +23,92 @@ Heros is a generic implementation of an IFDS/IDE Solver that can be plugged into
 
 Dependency
 ---
-HisDroid is depends on Soot and Heros. It use a manipulated version of Soot nightly build jar for the purpose of some bugs. Details: [Soot](https://github.com/pass518224/soot/commits/develop), [Heros](https://github.com/pass518224/heros/commits/develop)
+libericc is depends on Soot and Heros. It use a manipulated version of Soot nightly build jar for the purpose of some bugs. Details: [Soot](https://github.com/pass518224/soot/commits/develop), [Heros](https://github.com/pass518224/heros/commits/develop)
 
 Architecture
 ---
-### hisdroid.Main
+### libericc.Main
 #### Main()
 1. Parse command line and setting
-2. Add SceneTransformer *hisdroid.HisdroidAnalysisTransformer* in pack *wjtp*
+2. Add SceneTransformer due to argument
+	1. Add SceneTransformer *libericc.LibericcPreEvaluateTransformer* in pack *wjtp* for insturment before evaluation
+	2. Add SceneTransformer *libericc.LibericcAnalysisTransformer* in pack *wjtp* for analysis
 3. call *PackManager.runPacks()* to start soot
 
-### hisdroid.HisdroidAnalysisTransformer
+### libericc.Config
+1. Global configuration of Libericc
+
+### libericc.LibericcPreEvaluateTransformer
+1. Instrument the apk to log the method invocation and branch decision
+2. Insert call stmt in methods and branches to call *libericc.PreEvaluateLogger() and log to adblog
+
+### libericc.LibericcPreEvaluateLogger
+1. Inserted in apk to log method invocations and branch decisions
+2. Output in adblog with prefix "libericc"
+
+### libericc.LibericcAnalysisTransformer
 #### internalTransform()
 1. Start at wjtp
 1. Create dummy main based on ICC log
 2. Turn on *spark* and run *cg* pack manually
-3. Run *hisdroid.IDEAnalyzer.analyze()* to start analysis
-4. Instrument code with analysis result
+3. Use *libericc.IDEAnalyzer.analyze()* to start analysis
+5. Use *libericc.decider.Decider* to determine whether the branches execute
+6. Use *libericc.instrumenter.AnalysisInstrumenter* to instrument the app. It takes a *Decider* and a *libericc.pruner.BranchPruner* as argument
+4. Use *libericc.evaluation.Evaluator* to evaluate percision if needed
 
-### hisdroid.DummyMainCreator
+### libericc.DummyMainCreator
 #### createDummyMain()
 1. Create class *DummyMain* with a static int field *iccNo* and a *main* method
 2. For each ICC log
 	1. Assign iccNo to ICC id
-	2. Create proper method call
+	2. Create proper method call for a lifecycle ICC
 3. Set DummyMain as the main method of Soot
+4. Details
+	1. A component is recongnized by a binder in Android. The binder is a 16-bytes long hex in ICC log. A component created with name and binder. After that, system communicate it with only binder. The mapping of component and binder needs to be log in component creation.
 
-### hisdroid.IDEAnalyzer
+### libericc.IDEAnalyzer
 #### analyze()
-1. create a *hisdroid.ide.IDEProblem* instance
-2. solve IDEProblem with heros.solver.IDESolver
+1. Create a *libericc.ide.ConstantPropagationProblem* instance
+2. Solve ConstantPropagationProblem with heros.solver.IDESolver
+
+### libericc.decider.AnalysisDecider
+1. Determine the runtime result of branches and switches based on the result of Analyzer
+
+### libericc.PredictResult
+1. Representation of the predict result of analysis
+	1. True: The true branch is taken
+	2. False: The false branch is taken
+	3. Both: Both branch are taken
+	4. Ambiguous: Not able to decide the branch result(ex. the condition variable is unknown in IDE analysis)
+	5. Unknown: Not in the analysis scope (ex. the branch is not in call graph, the condition variable is not in IDE analysis)
+
+### libericc.pruner.BranchPruner
+1. Prune branches and switches based on given result
+1. Available types
+	1. ConservativeBranchPruner: Prune the unreached branch of *True* and *False*. Reserve both branch of *Both*. Reserve both branch of *Ambiguous* and *Unknown*. Default.
+	2. AggressiveBranchPruner: Prune the unreached branch of *True* and *False*. Reserve both branch of *Both*. Prune both branch of *Ambiguous* and *Unknown*.
+	3. DoNothingBranchPruner: Reserve all.
+
+### libericc.instrumenter.AnalysisInstrumenter
+1. Instrument the apk
+2. Traverse app methods and branches. Pass the result of *Decider* to *BranchPruner*.
+
+### libericc.evaluation.Evaluator
+1. Evaluate the precision of *Decider* to the runtime log.
+2. Available types
+	1. ConservativeEvaluator
+	2. AggressiveEvaluator
+3. *Evaluator* is independent to *Instrumenter*. Run it before *Instrumenter*. Instrument changes the id of branches. *Evaluator* connot identify branches if it run after *Instrumenter*.
+
+
 
 ### soot.Value
 A interface in soot, represents data or expression. Local, FieldRef, Constant, Expr all implement Value. Used as data-flow fact in *IDEProblem.* 
 
-### hisdroid.value.GeneralValue
+### libericc.value.GeneralValue
 A abstract class, represents the value of data-flow fact(soot.Value). IntentValue, PrimitiveDataValue, BottomValue extends it.
 
-### hisdroid.ide.IDEProblem
+### libericc.ide.IDEProblem
 extends *soot.jimple.toolkits.ide.DefaultJimpleIDETabulationProblem*
 #### getNormalFlow(), getCallFlow(), getReturnFlow(), getCallToReturnFlow()
 return a *heros.FlowFunction* at a stmt, call to a method, return from a method, direct call-to-return
@@ -79,12 +127,12 @@ return a EdgeFunction compose with this and secondFuncion
 #### EdgeFunction<GeneralValue> joinWith(EdgeFunction<GeneralValue> otherFunction)
 return a EdgeFunction join with this and otherFuncion
 
-### hisdroid.edgefunction.EdgeFunctionTemplate
-A abstract class implements heros.EdgeFunction<GeneralValue>. All Edgefunction in hisdroid are extends from it.
+### libericc.edgefunction.EdgeFunctionTemplate
+A abstract class implements heros.EdgeFunction<GeneralValue>. All Edgefunction in libericc are extends from it.
 Use linked list to implement *composeWith()* method. subclass can implement composeWithNext() to optimize.
 To simplify *joinWith()*, only join two edge when both edge has same next edge. Otherwise, return AllBottom.
 
-### hisdroid.callhandler.CallHandler
+### libericc.callhandler.CallHandler
 A abstract class which perform a special handler toward a specific method.
 #### Set<MethodSig> getTargets()
 Return a set of method signatures handled by the handler
@@ -93,17 +141,5 @@ Return the FlowFunction at the method call
 #### getCallEdgeFunction(), getReturnEdgeFunction(), getCallToReturnEdgeFunction()
 Return the EdgeFunction at the method call
 
-### hisdroid.callhandler.Handlers
+### libericc.callhandler.Handlers
 A collction of CallHandler. IDEProblem will query it.
-
-### hisdroid.instrumenter.Instrumenter
-A abstract class.
-Implements the feature of determine whether branch takes based on the result of Analyzer.
-#### abstract void instrumentBranch(), abstract public List<Unit> instrumentSwitch()
-Subclass should implements these two function to instrument code
-
-### hisdroid.instrumenter.Pruner
-Prune the branches which won't be taken.
-
-### hisdroid.instrumenter.StatsInstrumenter
-Insert code to print some statistics message in branches.
