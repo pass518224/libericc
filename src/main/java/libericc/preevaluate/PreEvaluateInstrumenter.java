@@ -24,6 +24,13 @@ import soot.jimple.Jimple;
 import soot.jimple.Stmt;
 import soot.jimple.SwitchStmt;
 
+/*
+ * Instrument the apk to log the method invocation and branch decision
+ *
+ * Insert call stmt in methods and branches
+ * It calls PreEvaluateLogger and log to adblog
+ */
+
 public class PreEvaluateInstrumenter {
 	static String evaloggerPackage = "libericc.preevaluate";
 	static String evaloggerName = "PreEvaluateLogger";
@@ -122,6 +129,20 @@ public class PreEvaluateInstrumenter {
 	}
 	
 	void instrumentBranch(SootMethod method, IfStmt stmt, int branchId){
+		/*
+		 * ex. a branch
+		 *
+		 *     if (cond) goto target
+		 *
+		 * is instrument as
+		 *
+		 *     if (cond) goto L1                   // instrumented
+		 *     branchResult(hashid, 0)             // instrumented, false branch
+		 *     goto L2                             // instrumented
+		 *     L1: branchResult(hashid, 1)         // instrumented, true branch
+		 *     L2: if (cond) goto target           // origin branch
+		 *
+		 */
 		PatchingChain<Unit> unitChain = method.getActiveBody().getUnits();
 		Value condition = stmt.getCondition();
 		Unit logTrueUnit = Jimple.v().newInvokeStmt(Jimple.v().newStaticInvokeExpr(branchResultRef, IntConstant.v(branchHashCode(method, branchId)), IntConstant.v(1)));
@@ -150,6 +171,10 @@ public class PreEvaluateInstrumenter {
 		return String.format("%s:%d", method, id).hashCode();
 	}
 	
+
+	/*
+	 * The logger should be dump to filesystem and as the input argument for soot
+	 */
 	static public void storePreEvaluateLogger(){
 		InputStream in = null;
 		OutputStream out = null;

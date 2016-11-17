@@ -37,6 +37,12 @@ import soot.jimple.Stmt;
 import soot.jimple.StringConstant;
 import soot.jimple.SwitchStmt;
 
+/*
+ * Experimental Logger
+ * Log every parameter of method invocation
+ */
+
+
 public class PreEvaluateInstrumenterTest {
 	static protected final Logger logger = Logger.getLogger("Libericc");
 	

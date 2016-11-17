@@ -40,6 +40,12 @@ import soot.jimple.LongConstant;
 import soot.jimple.NullConstant;
 import soot.options.Options;
 
+/*
+ * Generates lifecycle entries of all components
+ * libericc.DummyMainCreator is based on ICC records
+ * This is all componenets found in the apk
+ */
+
 public class DummyMainCreator {
 	SootClass dummyMainClass;
 	SootMethod mainMethod;
