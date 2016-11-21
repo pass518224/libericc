@@ -4,6 +4,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/*
+ * The normal implementation of GeneralValue
+ * The generic type is stored in variable. Because Java generic doesn't has runtime infomation
+ */
+
 public class DataValue<T> extends GeneralValue {
 	Class<T> type;
 	Set<T> valueSet;
@@ -22,7 +27,12 @@ public class DataValue<T> extends GeneralValue {
 		valueSet = vset;
 		bottom = vset.isEmpty();
 	}
-	
+
+	/*
+	 * if other value is TopValue: return this
+	 * if other value is same type DataValue: return new DataValue with union set
+	 * else: return bottom
+	 */
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue){
 		if (otherValue instanceof TopValue) return this;

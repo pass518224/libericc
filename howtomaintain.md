@@ -103,12 +103,24 @@ Architecture
 
 
 ### soot.Value
-A interface in soot, represents data or expression. Local, FieldRef, Constant, Expr all implement Value. Used as data-flow fact in *IDEProblem.* 
+A interface in soot, represents data or expression. Local, FieldRef, Constant, Expr all implement Value. Used as data-flow fact in *ConstantPropagationProblem.* 
 
 ### libericc.value.GeneralValue
 A abstract class, represents the value of data-flow fact(soot.Value). IntentValue, PrimitiveDataValue, BottomValue extends it.
 
-### libericc.ide.IDEProblem
+### libericc.value.DataValue
+The normal implementation of GeneralValue
+
+### libericc.value.PrimitiveDataValue
+Special implementation for DataValue. Implement ComparableGeneralValue.
+
+### libericc.value.StringValue
+Special implementation for DataValue. Implement EqualableGeneralValue.
+
+### libericc.value.interface.ComparableGeneralValue, libericc.value.interface.EqualableGeneralValue
+Interface for GeneralValue. Means the value is able to compare/equal to another value.
+
+### libericc.ide.ConstantPropagationProblem
 extends *soot.jimple.toolkits.ide.DefaultJimpleIDETabulationProblem*
 #### getNormalFlow(), getCallFlow(), getReturnFlow(), getCallToReturnFlow()
 return a *heros.FlowFunction* at a stmt, call to a method, return from a method, direct call-to-return

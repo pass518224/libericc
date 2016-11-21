@@ -1,4 +1,4 @@
-HisDroid
+Libericc
 ===
 Introduction
 ---
@@ -18,7 +18,7 @@ Usage
 	 -e,--evaluate-log <adblog>    evaluate accuracy with runtime adb log
 	 -f,--output-format <format>   Output Format [none, apk, jimple] (Default: apk)
 	 -i,--instrument <type>        Instrument type [none, prune, aggressive, pre-eva] (Default: prune)
-	 -j,--android-jar <jarpath>    Android jar libraries
+	 -j,--android-jar <jarpath>    Android jar libraries (path/to/android/sdk/platfroms)
 	 -l,--log <logfile>            ICC Log in JSON format
 	 -n,--iccno <iccno>            only process iccno
 
@@ -39,7 +39,7 @@ Analysis Steps
 
 1. Collect ICCs from Android emulator
     ```
-    emulator -avd <devicename> -kernel zImage -gpu on
+    emulator -avd <devicename> -kernel <kernel> -gpu on
     ```
 
 1. Start Logging

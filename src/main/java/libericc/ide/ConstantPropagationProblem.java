@@ -57,6 +57,11 @@ import soot.jimple.Stmt;
 import soot.jimple.internal.JimpleLocal;
 import soot.jimple.toolkits.ide.DefaultJimpleIDETabulationProblem;
 
+/*
+ * The Constant Propagation Problem in IDE framework
+ * Notice the operation is "meet" and the node every nodes meets is "bottom" 
+ */
+
 public class ConstantPropagationProblem extends DefaultJimpleIDETabulationProblem<Value, GeneralValue, InterproceduralCFG<Unit,SootMethod>> {
 	static PointsToAnalysis pointsToAnalysis = Scene.v().getPointsToAnalysis();
 	
@@ -276,7 +281,7 @@ public class ConstantPropagationProblem extends DefaultJimpleIDETabulationProble
 					if (source.equivTo(rightOp)) {
 						res.add(leftOp);
 					}
-					/*else { // points-to analysis
+					else { // points-to analysis
 						PointsToSet rightPointsToSet = null, sourcePointsToSet = null;
 						if (rightOp instanceof Local) {
 							Local rightLocal = (Local) rightOp;
@@ -307,7 +312,7 @@ public class ConstantPropagationProblem extends DefaultJimpleIDETabulationProble
 						if (rightPointsToSet != null && sourcePointsToSet != null && rightPointsToSet.hasNonEmptyIntersection(sourcePointsToSet)) {
 							res.add(leftOp);
 						}
-					}*/
+					}
 					
 					return res;
 				}

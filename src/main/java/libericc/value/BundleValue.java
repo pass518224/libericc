@@ -23,7 +23,7 @@ public class BundleValue extends DataValue<JSONObject> {
 	@Override
 	public GeneralValue joinWith(GeneralValue otherValue){
 		GeneralValue tmp = super.joinWith(otherValue);
-		if (otherValue instanceof IntentValue && tmp instanceof DataValue) {
+		if (otherValue instanceof BundleValue && tmp instanceof DataValue) {
 			if (type.equals(((DataValue<?>) tmp).type)) {
 				@SuppressWarnings("unchecked")
 				DataValue<JSONObject> tmpdv = (DataValue<JSONObject>) tmp;
